@@ -92,8 +92,27 @@ export let init = () => {
     window.googletag.cmd = window.googletag.cmd || [];
     window.googletag.cmd.push(() => {
       window.googletag.pubads().addEventListener(GPT_SLOT_RENDER_ENDED_EVENT, function(event) {
-        // eslint-disable-next-line no-console
-        console.log('ad was rendered');
+        let vsgObj;
+        if (localStorage.getItem('vsg')) {
+          vsgObj = JSON.parse(localStorage.getItem('vsg'));
+          if (vsgObj[event.slot.getSlotElementId()]) {
+            vsgObj[event.slot.getSlotElementId()].rendered = vsgObj[event.slot.getSlotElementId()].rendered + 1;
+          } else {
+            vsgObj[event.slot.getSlotElementId()] = {
+              rendered: 1,
+              viewed: 0
+            }
+          }
+        } else {
+          vsgObj = {
+            [event.slot.getSlotElementId()]: {
+              rendered: 1,
+              viewed: 0
+            }
+          }
+        }
+
+        localStorage.setItem('vsg', JSON.stringify(vsgObj));
       });
 
       // window.googletag.pubads().addEventListener(GPT_SLOT_ONLOAD_EVENT, function(event) {
