@@ -1,0 +1,92 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="./css/main.css">
+    <script async src="../../../build/dev/prebid.js"></script>
+    <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+    <script>
+        var FAILSAFE_TIMEOUT = 3300;
+        var PREBID_TIMEOUT = 2000;
+
+        var adUnits = [{
+          code: 'div-gpt-ad-1460505748561-0',
+          mediaTypes: {
+            banner: {
+              sizes: [[300, 250], [300,600]],
+            }
+          },
+          bids: [
+            {
+              bidder: 'pubmatic',
+              params: {
+                publisherId: '156276',
+                adSlot: 'pubmatic_test'
+              }
+            }
+          ]
+        }];
+
+        var pbjs = pbjs || {};
+        pbjs.que = pbjs.que || [];
+
+        var googletag = googletag || {};
+        googletag.cmd = googletag.cmd || [];
+        googletag.cmd.push(function() {
+          googletag.pubads().disableInitialLoad();
+        });
+
+        pbjs.que.push(function() {
+          pbjs.setConfig({
+            // debugging: {
+            //   enabled: true
+            // },
+            viewabilityScoreGeneration: {
+              enabled: true
+            }
+          });
+
+          pbjs.addAdUnits(adUnits);
+          pbjs.requestBids({
+            bidsBackHandler: sendAdserverRequest,
+            timeout: PREBID_TIMEOUT
+          });
+        });
+
+        function sendAdserverRequest() {
+          if (pbjs.adserverRequestSent) return;
+
+          pbjs.onEvent('bidViewable', function(bid) {
+            console.log('got bid details in bidViewable event', bid);
+          });
+
+          pbjs.adserverRequestSent = true;
+          googletag.cmd.push(function() {
+            pbjs.que.push(function() {
+              pbjs.setTargetingForGPTAsync();
+              googletag.pubads().refresh();
+            });
+          });
+        }
+
+        setTimeout(function() {
+          sendAdserverRequest();
+        }, FAILSAFE_TIMEOUT);
+
+        googletag.cmd.push(function () {
+          googletag.defineSlot('/19968336/header-bid-tag-0', [[300, 250], [300, 600]], 'div-gpt-ad-1460505748561-0').addService(googletag.pubads());
+          googletag.pubads().enableSingleRequest();
+          googletag.enableServices();
+        });
+    </script>
+  </head>
+  <body>
+    <div id="above-the-fold">above the fold</div>
+    <div id="below-the-fold">
+      below the fold
+      <div id='div-gpt-ad-1460505748561-0'>
+        <script type='text/javascript'>
+          googletag.cmd.push(function() { googletag.display('div-gpt-ad-1460505748561-0'); });
+        </script>
+      </div>
+    </div>
+  </body>
+</html>

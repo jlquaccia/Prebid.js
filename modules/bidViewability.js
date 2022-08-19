@@ -62,6 +62,8 @@ export let logWinningBidNotFound = (slot) => {
 
 export let impressionViewableHandler = (globalModuleConfig, slot, event) => {
   let respectiveBid = getMatchingWinningBidForGPTSlot(globalModuleConfig, slot);
+  // eslint-disable-next-line no-console
+  console.log('respectiveBid: ', respectiveBid);
   if (respectiveBid === null) {
     logWinningBidNotFound(slot);
   } else {
