@@ -540,9 +540,21 @@ adapterManager.getAnalyticsAdapter = function(code) {
 }
 
 function tryCallBidderMethod(bidder, method, param) {
+  // eslint-disable-next-line no-console
+  console.log('bidder: ', bidder);
+  // eslint-disable-next-line no-console
+  console.log('method: ', method);
+  // eslint-disable-next-line no-console
+  console.log('param: ', param);
   try {
     const adapter = _bidderRegistry[bidder];
     const spec = adapter.getSpec();
+
+    // eslint-disable-next-line no-console
+    console.log('adapter: ', adapter);
+    // eslint-disable-next-line no-console
+    console.log('spec: ', spec);
+
     if (spec && spec[method] && typeof spec[method] === 'function') {
       logInfo(`Invoking ${bidder}.${method}`);
       config.runWithBidder(bidder, bind.call(spec[method], spec, param));
