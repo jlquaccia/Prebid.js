@@ -400,6 +400,29 @@ $$PREBID_GLOBAL$$.setTargetingForGPTAsync = function (adUnit, customSlotMatching
   // get our ad unit codes
   let targetingSet = targeting.getAllTargeting(adUnit);
 
+  // eslint-disable-next-line no-console
+  console.log('targetingSet: ', targetingSet);
+
+  let vsgObj;
+  if (localStorage.getItem('vsg')) {
+    vsgObj = JSON.parse(localStorage.getItem('vsg'));
+    Object.keys(targetingSet).forEach(targetKey => {
+      // eslint-disable-next-line no-console
+      console.log('targetKey: ', targetKey);
+      if (
+        vsgObj[targetKey] &&
+        Object.keys(targetingSet[targetKey]).length !== 0 &&
+        vsgObj[targetKey].hasOwnProperty('viewed') &&
+        vsgObj[targetKey].hasOwnProperty('rendered')
+      ) {
+        const bvs = Math.round((vsgObj[targetKey].viewed / vsgObj[targetKey].rendered) * 10) / 10;
+        const bvb = bvs > 0.7 ? 'HIGH' : bvs < 0.5 ? 'LOW' : 'MEDIUM';
+        targetingSet[targetKey].bidViewabilityScore = bvs;
+        targetingSet[targetKey].bidViewabilityBucket = bvb;
+      }
+    });
+  }
+
   // first reset any old targeting
   targeting.resetPresetTargeting(adUnit, customSlotMatching);
 

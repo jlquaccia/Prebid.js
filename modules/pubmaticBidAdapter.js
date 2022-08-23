@@ -593,6 +593,12 @@ function _addPMPDealsInImpression(impObj, bid) {
   }
 }
 
+function _addBidViewabilityData(impObj, bid) {
+  if (bid.bidViewability) {
+    impObj.ext.bidViewability = bid.bidViewability;
+  }
+}
+
 function _addDealCustomTargetings(imp, bid) {
   var dctr = '';
   var dctrLen;
@@ -663,6 +669,8 @@ function _createImpressionObject(bid, conf) {
   _addPMPDealsInImpression(impObj, bid);
   _addDealCustomTargetings(impObj, bid);
   _addJWPlayerSegmentData(impObj, bid);
+  _addBidViewabilityData(impObj, bid);
+
   if (bid.hasOwnProperty('mediaTypes')) {
     for (mediaTypes in bid.mediaTypes) {
       switch (mediaTypes) {
@@ -1024,6 +1032,10 @@ export const spec = {
    * @return ServerRequest Info describing the request to the server.
    */
   buildRequests: (validBidRequests, bidderRequest) => {
+    // eslint-disable-next-line no-console
+    console.log('validBidRequests: ', validBidRequests);
+    // eslint-disable-next-line no-console
+    console.log('bidderRequest: ', bidderRequest);
     // convert Native ORTB definition to old-style prebid native definition
     validBidRequests = convertOrtbRequestToProprietaryNative(validBidRequests);
     var refererInfo;
@@ -1195,6 +1207,9 @@ export const spec = {
       }
       delete payload.site;
     }
+
+    // eslint-disable-next-line no-console
+    console.log('payload: ', payload);
 
     return {
       method: 'POST',
