@@ -11,6 +11,7 @@ body {
   align-items: center;
   width: 100vw;
   background-color: rgb(203 245 255);
+  flex-direction: column;
 }
 
 #below-the-fold {
@@ -21,6 +22,6 @@ body {
   margin: 50px;
 }
 
-#below-the-fold #div-gpt-ad-1460505748561-0 {
-  margin-top: 25px;
+.flex-item {
+  margin: 5px;
 }
