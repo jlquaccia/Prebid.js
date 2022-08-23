@@ -1,27 +1,85 @@
+@import url('https://fonts.googleapis.com/css?family=Montserrat:400,600');
+
+html {
+  box-sizing: border-box;
+  font-family: Montserrat, sans-serif;
+  color: #333;
+  font-weight: 400;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
 body {
-  color: #000;
-  font-weight: 100;
-  font-size: 24px;
+  line-height: 1.5;
+  padding: 1em;
+  margin: 0;
 }
 
-#above-the-fold {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100vw;
-  background-color: rgb(203 245 255);
-  flex-direction: column;
+.container {
+  max-width: 70em;
+  margin: 0 auto;
 }
 
-#below-the-fold {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin: 50px;
+.container:before, .container:after {
+  display: table;
+  content: "";
+  clear: both;
 }
 
-.flex-item {
-  margin: 5px;
+h1 {
+  font-size: 3em;
+  line-height: 1.2;
+  margin: 0.67em 0;
+}
+
+.subtitle, .post-content {
+  float: left;
+  width: 60%;
+  margin-right: 10%;
+}
+
+.subtitle {
+  font-size: 2em;
+  font-weight: 400;
+  font-style: italic;
+  font-family: georgia, serif;
+  margin-top: 0;
+}
+
+.meta, .sidebar-item {
+  float: right;
+  /* width: 30%; */
+  width: 33%;
+  clear: right;
+  border-top: 5px solid #666;
+  background: #eee;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.meta > *, .sidebar-item > * {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+h3 {
+  font-size: 1.5em;
+}
+
+.subtitle, .post-content {
+  float: left;
+  /* width: 60%; */
+  width: 57%;
+  margin-right: 10%;
+}
+
+.post-content {
+  font-family: georgia, serif;
+}
+
+.post-content p {
+  font-size: 1.25em;
+  line-height: 1.75;
 }

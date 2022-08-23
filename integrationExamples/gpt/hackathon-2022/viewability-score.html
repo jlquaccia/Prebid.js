@@ -1,159 +1,174 @@
-<html>
-  <head>
-    <link rel="stylesheet" href="./css/main.css">
-    <script async src="../../../build/dev/prebid.js"></script>
-    <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
-    <script>
-        var FAILSAFE_TIMEOUT = 3300;
-        var PREBID_TIMEOUT = 2000;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./css/main.css">
+  <script async src="../../../build/dev/prebid.js"></script>
+  <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+  <title>Document</title>
+  <script>
+    var FAILSAFE_TIMEOUT = 3300;
+    var PREBID_TIMEOUT = 2000;
 
-        var adUnits = [
+    var adUnits = [
+      {
+        code: 'div-gpt-ad-1460505748561-0',
+        mediaTypes: {
+          banner: {
+            sizes: [[300, 250], [300,600]],
+          }
+        },
+        bids: [
           {
-            code: 'div-gpt-ad-1460505748561-0',
-            mediaTypes: {
-              banner: {
-                sizes: [[300, 250], [300,600]],
-              }
-            },
-            bids: [
-              {
-                bidder: 'pubmatic',
-                params: {
-                  publisherId: '156276',
-                  adSlot: 'pubmatic_test'
-                }
-              }
-            ]
-          },
-          // {
-          //   code: 'div-gpt-ad-1460505748561-4',
-          //   mediaTypes: {
-          //     banner: {
-          //       sizes: [[728, 90], [970, 250]],
-          //     }
-          //   },
-          //   bids: [
-          //     {
-          //       bidder: 'pubmatic',
-          //       params: {
-          //         publisherId: '156276',
-          //         adSlot: 'pubmatic_test'
-          //       }
-          //     }
-          //   ]
-          // },
-          {
-            code: 'div-gpt-ad-1460505748561-1',
-            mediaTypes: {
-              banner: {
-                sizes: [[728, 90]]
-              }
-            },
-            bids: [
-              {
-                bidder: 'rubicon',
-                params: {
-                  accountId: 14062,
-                  siteId: 70608,
-                  zoneId: 498816
-                }
-              }
-            ]
-          },
-          {
-            code: 'div-gpt-ad-1460505748561-2',
-            mediaTypes: {
-              banner: {
-                sizes: [[300, 250]]
-              }
-            },
-            bids: [
-              {
-                bidder: 'rubicon',
-                params: {
-                  accountId: 14062,
-                  siteId: 70608,
-                  zoneId: 498816
-                }
-              }
-            ]
-          },
-          // {
-          //   code: 'div-gpt-ad-1574864639578-3',
-          //   mediaTypes: {
-          //     banner: {
-          //       sizes: [0, 0],
-          //     }
-          //   },
-          //   bids: [{
-          //     bidder: "afp",
-          //     params: {
-          //       placeType: "In-image",
-          //       placeId: "613221112871613d1517d181",
-          //       placeContainer: '#iib-container',
-          //       imageUrl: "https://rtbinsight.ru/content/images/size/w1000/2021/05/ximage-30.png.pagespeed.ic.IfuX4zAEPP.png",
-          //       imageWidth: 600,
-          //       imageHeight: 400,
-          //     }
-          //   }]
-          // }
-        ];
-
-        var pbjs = pbjs || {};
-        pbjs.que = pbjs.que || [];
-
-        var googletag = googletag || {};
-        googletag.cmd = googletag.cmd || [];
-        googletag.cmd.push(function() {
-          googletag.pubads().disableInitialLoad();
-        });
-
-        pbjs.que.push(function() {
-          pbjs.setConfig({
-            // debugging: {
-            //   enabled: true
-            // },
-            viewabilityScoreGeneration: {
-              enabled: true
+            bidder: 'pubmatic',
+            params: {
+              publisherId: '156276',
+              adSlot: 'pubmatic_test'
             }
-          });
+          }
+        ]
+      },
+      // {
+      //   code: 'div-gpt-ad-1460505748561-4',
+      //   mediaTypes: {
+      //     banner: {
+      //       sizes: [[728, 90], [970, 250]],
+      //     }
+      //   },
+      //   bids: [
+      //     {
+      //       bidder: 'pubmatic',
+      //       params: {
+      //         publisherId: '156276',
+      //         adSlot: 'pubmatic_test'
+      //       }
+      //     }
+      //   ]
+      // },
+      {
+        code: 'div-gpt-ad-1460505748561-1',
+        mediaTypes: {
+          banner: {
+            sizes: [[728, 90]]
+          }
+        },
+        bids: [
+          {
+            bidder: 'rubicon',
+            params: {
+              accountId: 14062,
+              siteId: 70608,
+              zoneId: 498816
+            }
+          }
+        ]
+      },
+      {
+        code: 'div-gpt-ad-1460505748561-2',
+        mediaTypes: {
+          banner: {
+            sizes: [[300, 250]]
+          }
+        },
+        bids: [
+          {
+            bidder: 'rubicon',
+            params: {
+              accountId: 14062,
+              siteId: 70608,
+              zoneId: 498816
+            }
+          }
+        ]
+      },
+      // {
+      //   code: 'div-gpt-ad-1574864639578-3',
+      //   mediaTypes: {
+      //     banner: {
+      //       sizes: [0, 0],
+      //     }
+      //   },
+      //   bids: [{
+      //     bidder: "afp",
+      //     params: {
+      //       placeType: "In-image",
+      //       placeId: "613221112871613d1517d181",
+      //       placeContainer: '#iib-container',
+      //       imageUrl: "https://rtbinsight.ru/content/images/size/w1000/2021/05/ximage-30.png.pagespeed.ic.IfuX4zAEPP.png",
+      //       imageWidth: 600,
+      //       imageHeight: 400,
+      //     }
+      //   }]
+      // }
+    ];
 
-          pbjs.addAdUnits(adUnits);
-          pbjs.requestBids({
-            bidsBackHandler: sendAdserverRequest,
-            timeout: PREBID_TIMEOUT
-          });
-        });
+    var pbjs = pbjs || {};
+    pbjs.que = pbjs.que || [];
 
-        function sendAdserverRequest() {
-          if (pbjs.adserverRequestSent) return;
-          pbjs.adserverRequestSent = true;
-          googletag.cmd.push(function() {
-            pbjs.que.push(function() {
-              pbjs.setTargetingForGPTAsync();
-              googletag.pubads().refresh();
-            });
-          });
+    var googletag = googletag || {};
+    googletag.cmd = googletag.cmd || [];
+    googletag.cmd.push(function() {
+      googletag.pubads().disableInitialLoad();
+    });
+
+    pbjs.que.push(function() {
+      pbjs.setConfig({
+        // debugging: {
+        //   enabled: true
+        // },
+        viewabilityScoreGeneration: {
+          enabled: true
         }
+      });
 
-        setTimeout(function() {
-          sendAdserverRequest();
-        }, FAILSAFE_TIMEOUT);
+      pbjs.addAdUnits(adUnits);
+      pbjs.requestBids({
+        bidsBackHandler: sendAdserverRequest,
+        timeout: PREBID_TIMEOUT
+      });
+    });
 
-        googletag.cmd.push(function () {
-          googletag.defineSlot('/19968336/header-bid-tag-0', [[300, 250], [300, 600]], 'div-gpt-ad-1460505748561-0').addService(googletag.pubads());
-          googletag.defineSlot('/19968336/header-bid-tag-1', [[728, 90]], 'div-gpt-ad-1460505748561-1').addService(googletag.pubads());
-          googletag.defineSlot('/19968336/header-bid-tag-2', [[300, 250]], 'div-gpt-ad-1460505748561-2').addService(googletag.pubads());
-          // googletag.defineSlot('/19968336/header-bid-tag-3', [[300, 250]], 'div-gpt-ad-1574864639578-3').addService(googletag.pubads());
-          // googletag.defineSlot('/19968336/header-bid-tag-4', [[728, 90], [970, 250]], 'div-gpt-ad-1460505748561-4').addService(googletag.pubads());
-          googletag.pubads().enableSingleRequest();
-          googletag.enableServices();
+    function sendAdserverRequest() {
+      if (pbjs.adserverRequestSent) return;
+      pbjs.adserverRequestSent = true;
+      googletag.cmd.push(function() {
+        pbjs.que.push(function() {
+          pbjs.setTargetingForGPTAsync();
+          googletag.pubads().refresh();
         });
-    </script>
-  </head>
-  <body>
-    <div id="above-the-fold">
-      <div class="flex-item">above the fold</div>
+      });
+    }
+
+    setTimeout(function() {
+      sendAdserverRequest();
+    }, FAILSAFE_TIMEOUT);
+
+    googletag.cmd.push(function () {
+      googletag.defineSlot('/19968336/header-bid-tag-0', [[300, 250], [300, 600]], 'div-gpt-ad-1460505748561-0').addService(googletag.pubads());
+      googletag.defineSlot('/19968336/header-bid-tag-1', [[728, 90]], 'div-gpt-ad-1460505748561-1').addService(googletag.pubads());
+      googletag.defineSlot('/19968336/header-bid-tag-2', [[300, 250]], 'div-gpt-ad-1460505748561-2').addService(googletag.pubads());
+      // googletag.defineSlot('/19968336/header-bid-tag-3', [[300, 250]], 'div-gpt-ad-1574864639578-3').addService(googletag.pubads());
+      // googletag.defineSlot('/19968336/header-bid-tag-4', [[728, 90], [970, 250]], 'div-gpt-ad-1460505748561-4').addService(googletag.pubads());
+      googletag.pubads().enableSingleRequest();
+      googletag.enableServices();
+    });
+  </script>
+</head>
+<body>
+  <div class="container grid">
+    <h1 class="title">This is the main title of the page or article, of some publisher page</h1>
+    <h2 class="subtitle">This is the subtitle of the page or article, and it's a little smaller than the main title</h2>
+    <div class="meta">
+      <!-- <h3>Metadata</h3>
+      <p>On small screens this stays up with the title and subtitle. On larger screens it moves to the sidebar.</p>
+      <ul>
+        <li>Date</li>
+        <li>Category</li>
+        <li>Contact info</li>
+        <li>Other info</li>
+      </ul> -->
       <div class="flex-item" id='div-gpt-ad-1460505748561-0'>
         <script type='text/javascript'>
           googletag.cmd.push(function() {
@@ -161,6 +176,14 @@
           });
         </script>
       </div>
+    </div>
+    <div class="post-content">
+      <p>This is the main content of the article or page. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam bibendum, eros vel maximus tristique, diam massa faucibus odio, a vulputate lorem nisi quis justo. In vel neque velit. Cras tincidunt mollis dolor, sit amet bibendum est.</p>
+      <p>Praesent rutrum, sem quis dignissim tempus, velit arcu porta nulla, nec lacinia augue purus sed risus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel mauris sagittis, fringilla ex nec, vehicula erat. Vivamus tincidunt fringilla tellus id commodo. Donec lacus turpis, luctus in lacinia aliquet, bibendum id elit. Vivamus a ullamcorper neque, id porta nibh. Vivamus id vestibulum diam, quis volutpat diam. Mauris velit augue, gravida nec sollicitudin blandit, congue sed sem.</p>
+      <p>Etiam ultrices ante ullamcorper vestibulum auctor. Ut non scelerisque diam. Duis sed tortor mattis, scelerisque risus eget, vestibulum felis. Morbi nec rutrum dolor. Integer sagittis fringilla ex vel tincidunt. Nam dictum nec tellus eget faucibus. Nulla euismod iaculis magna, sed vestibulum justo dignissim nec. Nullam cursus facilisis augue in accumsan.</p>
+      <p>Sed convallis nunc sed porta consequat. Pellentesque in felis eget massa faucibus mattis et cursus massa. In est nulla, egestas non lectus sit amet, faucibus ullamcorper lorem.</p>
+      <p>This is the main content of the article or page. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam bibendum, eros vel maximus tristique, diam massa faucibus odio, a vulputate lorem nisi quis justo. In vel neque velit. Cras tincidunt mollis dolor, sit amet bibendum est.</p>
+      <p>Praesent rutrum, sem quis dignissim tempus, velit arcu porta nulla, nec lacinia augue purus sed risus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed vel mauris sagittis, fringilla ex nec, vehicula erat. Vivamus tincidunt fringilla tellus id commodo. Donec lacus turpis, luctus in lacinia aliquet, bibendum id elit. Vivamus a ullamcorper neque, id porta nibh. Vivamus id vestibulum diam, quis volutpat diam. Mauris velit augue, gravida nec sollicitudin blandit, congue sed sem.</p>
       <div class="flex-item" id="div-gpt-ad-1460505748561-1">
         <script>
           googletag.cmd.push(function() {
@@ -168,28 +191,10 @@
           });
         </script>
       </div>
-      <!-- <div class="container-wrapper">
-        <div id="iib-container" style="width: 600px;">
-          <img src="https://creative.astraone.io/files/default_image-1-600x400.jpg" width="100%" />
-        </div>
-        <div id="div-gpt-ad-1574864639578-3">
-          <script type="text/javascript">
-            googletag.cmd.push(function() {
-              googletag.display('div-gpt-ad-1574864639578-3');
-            });
-          </script>
-        </div>
-      </div> -->
     </div>
-    <div id="below-the-fold">
-      <div class="flex-item">below the fold</div>
-      <!-- <div class="flex-item" id='div-gpt-ad-1460505748561-4'>
-        <script type='text/javascript'>
-          googletag.cmd.push(function() {
-            googletag.display('div-gpt-ad-1460505748561-4');
-          });
-        </script>
-      </div> -->
+    <div class="sidebar-item">
+      <!-- <h3>Sidebar Content</h3>
+      <p>This is sidebar content. On small screens it goes below the main content. On larger screens it moves to the sidebar.</p> -->
       <div class="flex-item" id='div-gpt-ad-1460505748561-2'>
         <script type='text/javascript'>
           googletag.cmd.push(function() {
@@ -198,5 +203,6 @@
         </script>
       </div>
     </div>
-  </body>
+  </div>
+</body>
 </html>
