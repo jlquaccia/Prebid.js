@@ -19,9 +19,6 @@ export function makeBidRequestsHook(fn, bidderRequests) {
     });
   }
 
-  // eslint-disable-next-line no-console
-  console.log(bidderRequests);
-
   fn(bidderRequests);
 }
 
@@ -45,7 +42,6 @@ export let init = () => {
         if (vsgObj) {
           if (vsgObj[currentAdSlotElement]) {
             if (vsgObj[currentAdSlotElement].lastViewed) delete vsgObj[currentAdSlotElement].lastViewed;
-            // if (vsgObj[currentAdSlotElement].totalViewTime) delete vsgObj[currentAdSlotElement].totalViewTime;
 
             vsgObj[currentAdSlotElement].rendered = vsgObj[currentAdSlotElement].rendered + 1;
             vsgObj[currentAdSlotElement].updatedAt = new Date();
@@ -98,11 +94,6 @@ export let init = () => {
       window.googletag.pubads().addEventListener('slotVisibilityChanged', function(event) {
         if (event.inViewPercentage > 1) {
           const currentAdSlotElement = event.slot.getSlotElementId();
-          // eslint-disable-next-line no-console
-          console.log(`${currentAdSlotElement} was in view`);
-          // eslint-disable-next-line no-console
-          console.log('event.inViewPercentage: ', event.inViewPercentage);
-
           const lastStarted = vsgObj[currentAdSlotElement].lastViewed;
           const currentTime = performance.now();
 

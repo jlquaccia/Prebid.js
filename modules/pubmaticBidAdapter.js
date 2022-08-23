@@ -1032,10 +1032,6 @@ export const spec = {
    * @return ServerRequest Info describing the request to the server.
    */
   buildRequests: (validBidRequests, bidderRequest) => {
-    // eslint-disable-next-line no-console
-    console.log('validBidRequests: ', validBidRequests);
-    // eslint-disable-next-line no-console
-    console.log('bidderRequest: ', bidderRequest);
     // convert Native ORTB definition to old-style prebid native definition
     validBidRequests = convertOrtbRequestToProprietaryNative(validBidRequests);
     var refererInfo;
@@ -1207,9 +1203,6 @@ export const spec = {
       }
       delete payload.site;
     }
-
-    // eslint-disable-next-line no-console
-    console.log('payload: ', payload);
 
     return {
       method: 'POST',

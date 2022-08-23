@@ -407,8 +407,6 @@ $$PREBID_GLOBAL$$.setTargetingForGPTAsync = function (adUnit, customSlotMatching
   if (localStorage.getItem('vsg')) {
     vsgObj = JSON.parse(localStorage.getItem('vsg'));
     Object.keys(targetingSet).forEach(targetKey => {
-      // eslint-disable-next-line no-console
-      console.log('targetKey: ', targetKey);
       if (
         vsgObj[targetKey] &&
         Object.keys(targetingSet[targetKey]).length !== 0 &&
