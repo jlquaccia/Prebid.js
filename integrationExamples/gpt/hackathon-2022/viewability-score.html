@@ -30,23 +30,6 @@
           }
         ]
       },
-      // {
-      //   code: 'div-gpt-ad-1460505748561-4',
-      //   mediaTypes: {
-      //     banner: {
-      //       sizes: [[728, 90], [970, 250]],
-      //     }
-      //   },
-      //   bids: [
-      //     {
-      //       bidder: 'pubmatic',
-      //       params: {
-      //         publisherId: '156276',
-      //         adSlot: 'pubmatic_test'
-      //       }
-      //     }
-      //   ]
-      // },
       {
         code: 'div-gpt-ad-1460505748561-1',
         mediaTypes: {
@@ -83,25 +66,55 @@
           }
         ]
       },
-      // {
-      //   code: 'div-gpt-ad-1574864639578-3',
-      //   mediaTypes: {
-      //     banner: {
-      //       sizes: [0, 0],
-      //     }
-      //   },
-      //   bids: [{
-      //     bidder: "afp",
-      //     params: {
-      //       placeType: "In-image",
-      //       placeId: "613221112871613d1517d181",
-      //       placeContainer: '#iib-container',
-      //       imageUrl: "https://rtbinsight.ru/content/images/size/w1000/2021/05/ximage-30.png.pagespeed.ic.IfuX4zAEPP.png",
-      //       imageWidth: 600,
-      //       imageHeight: 400,
-      //     }
-      //   }]
-      // }
+      {
+        code: "/21834411153/rsdk-2",
+        mediaTypes: {
+          banner: {
+            sizes: [[300, 250], [728, 90]]
+          }
+        },
+        bids: [{
+          bidder: 'appnexus',
+          params: {
+            placementId: 13144370
+          }
+        }]
+      },
+      {
+        code: 'div-gpt-ad-1574864639578-4',
+        mediaTypes: {
+          banner: {
+            sizes: [0, 0],
+          }
+        },
+        bids: [{
+          bidder: "afp",
+          params: {
+            placeType: "In-image",
+            placeId: "613221112871613d1517d181",
+            placeContainer: '#iib-container',
+            imageUrl: "https://rtbinsight.ru/content/images/size/w1000/2021/05/ximage-30.png.pagespeed.ic.IfuX4zAEPP.png",
+            imageWidth: 600,
+            imageHeight: 400,
+          }
+        }]
+      },
+      {
+        code: 'div-gpt-ad-1484867557615-5',
+        mediaTypes: {
+          banner: {
+            sizes: [[300, 250]]
+          }
+        },
+        bids: [{
+          bidder: 'smartadserver',
+          params: {
+            siteId: 207435,
+            pageId: 896536,
+            formatId: 62913
+          }
+        }]
+      }
     ];
 
     var pbjs = pbjs || {};
@@ -115,11 +128,35 @@
 
     pbjs.que.push(function() {
       pbjs.setConfig({
-        // debugging: {
-        //   enabled: true
-        // },
         viewabilityScoreGeneration: {
-          enabled: true
+          enabled: true,
+          targetingScoreKey: 'viewScore',
+          targetingBucketKey: 'bucketScore'
+        },
+        floors: {
+          enforcement: {
+             floorDeals: false
+          },
+          floorMin: 0.01,
+          data: {
+            floorProvider : 'pubmatic',
+            skipRate : 0,
+            currency: 'USD',
+            schema: {
+              fields: ['mediaType', 'bidViewabilityBucketing']
+            },
+            modelVersion : 'testAddtionalFields',
+            values : {
+              'banner|HIGH' : 0.16,
+              'banner|MEDIUM' : 0.10,
+              'banner|LOW' : 0.03,
+              'banner|*' : 0.02,
+              '*|*' : 0.01
+            }
+          },
+          additionalSchemaFields : {
+            bidViewabilityBucketing : getBidViewabilityBucketsPerBidRequest
+          }
         }
       });
 
@@ -141,6 +178,18 @@
       });
     }
 
+    function getBidViewabilityBucketsPerBidRequest (bidRequest, bidResponse) {
+      let vsgObj;
+      let result = false;
+      if (localStorage.getItem('viewability-data')) {
+        vsgObj = JSON.parse(localStorage.getItem('viewability-data'));
+        const bvs = Math.round((vsgObj[bidRequest.adUnitCode].viewed / vsgObj[bidRequest.adUnitCode].rendered) * 10) / 10;
+        const bvb = bvs > 0.7 ? 'HIGH' : bvs < 0.5 ? 'LOW' : 'MEDIUM';
+        result = bvb;
+      }
+      return result;
+    }
+
     setTimeout(function() {
       sendAdserverRequest();
     }, FAILSAFE_TIMEOUT);
@@ -149,8 +198,10 @@
       googletag.defineSlot('/19968336/header-bid-tag-0', [[300, 250], [300, 600]], 'div-gpt-ad-1460505748561-0').addService(googletag.pubads());
       googletag.defineSlot('/19968336/header-bid-tag-1', [[728, 90]], 'div-gpt-ad-1460505748561-1').addService(googletag.pubads());
       googletag.defineSlot('/19968336/header-bid-tag-2', [[300, 250]], 'div-gpt-ad-1460505748561-2').addService(googletag.pubads());
-      // googletag.defineSlot('/19968336/header-bid-tag-3', [[300, 250]], 'div-gpt-ad-1574864639578-3').addService(googletag.pubads());
-      // googletag.defineSlot('/19968336/header-bid-tag-4', [[728, 90], [970, 250]], 'div-gpt-ad-1460505748561-4').addService(googletag.pubads());
+      googletag.defineSlot('/21834411153/rsdk-2', [[300, 250], [728, 90]], 'div-gpt-ad-1574864639578-3').addService(googletag.pubads()).setTargeting('RSDK_VER', '2.1');
+      googletag.defineSlot('/19968336/header-bid-tag-4', [[300, 250]], 'div-gpt-ad-1574864639578-4').addService(googletag.pubads());
+      googletag.defineSlot('/45405203/hb_300x250', [300, 250], 'div-gpt-ad-1484867557615-5').addService(googletag.pubads());
+
       googletag.pubads().enableSingleRequest();
       googletag.enableServices();
     });
@@ -168,6 +219,11 @@
           });
         </script>
       </div>
+      <div id='div-gpt-ad-1574864639578-3'>
+        <script type='text/javascript'>
+          googletag.cmd.push(function() { googletag.display('div-gpt-ad-1574864639578-3'); });
+        </script>
+      </div>
     </div>
     <div class="post-content">
       <p>This is the main content of the article or page. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam bibendum, eros vel maximus tristique, diam massa faucibus odio, a vulputate lorem nisi quis justo. In vel neque velit. Cras tincidunt mollis dolor, sit amet bibendum est.</p>
@@ -183,12 +239,31 @@
           });
         </script>
       </div>
+      <div class="container-wrapper">
+        <div id="iib-container" style="width: 600px;">
+          <img src="https://creative.astraone.io/files/default_image-1-600x400.jpg" width="100%" />
+        </div>
+        <div id="div-gpt-ad-1574864639578-4">
+          <script type="text/javascript">
+            googletag.cmd.push(function() {
+              googletag.display('div-gpt-ad-1574864639578-4');
+            });
+          </script>
+        </div>
+      </div>
     </div>
     <div class="sidebar-item">
       <div class="flex-item" id='div-gpt-ad-1460505748561-2'>
         <script type='text/javascript'>
           googletag.cmd.push(function() {
             googletag.display('div-gpt-ad-1460505748561-2');
+          });
+        </script>
+      </div>
+      <div id='div-gpt-ad-1484867557615-5' style='height:250px; width:300px;'>
+        <script>
+          googletag.cmd.push(function () {
+            googletag.display('div-gpt-ad-1484867557615-5');
           });
         </script>
       </div>

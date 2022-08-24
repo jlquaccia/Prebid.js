@@ -10,8 +10,8 @@ const GPT_IMPRESSION_VIEWABLE_EVENT = 'impressionViewable';
 
 export function makeBidRequestsHook(fn, bidderRequests) {
   let vsgObj;
-  if (localStorage.getItem('vsg')) {
-    vsgObj = JSON.parse(localStorage.getItem('vsg'));
+  if (localStorage.getItem('viewability-data')) {
+    vsgObj = JSON.parse(localStorage.getItem('viewability-data'));
     bidderRequests.forEach(bidderRequest => {
       bidderRequest.bids.forEach(bid => {
         if (vsgObj[bid.adUnitCode]) bid.bidViewability = vsgObj[bid.adUnitCode];
@@ -32,7 +32,7 @@ export let init = () => {
       return;
     }
 
-    let vsgObj = JSON.parse(localStorage.getItem('vsg'));
+    let vsgObj = JSON.parse(localStorage.getItem('viewability-data'));
     // add the GPT event listeners
     window.googletag = window.googletag || {};
     window.googletag.cmd = window.googletag.cmd || [];
@@ -62,7 +62,7 @@ export let init = () => {
           }
         }
 
-        localStorage.setItem('vsg', JSON.stringify(vsgObj));
+        localStorage.setItem('viewability-data', JSON.stringify(vsgObj));
       });
 
       window.googletag.pubads().addEventListener(GPT_IMPRESSION_VIEWABLE_EVENT, function(event) {
@@ -88,11 +88,11 @@ export let init = () => {
           }
         }
 
-        localStorage.setItem('vsg', JSON.stringify(vsgObj));
+        localStorage.setItem('viewability-data', JSON.stringify(vsgObj));
       });
 
       window.googletag.pubads().addEventListener('slotVisibilityChanged', function(event) {
-        if (event.inViewPercentage > 1) {
+        if (event.inViewPercentage > 50) {
           const currentAdSlotElement = event.slot.getSlotElementId();
           const lastStarted = vsgObj[currentAdSlotElement].lastViewed;
           const currentTime = performance.now();
@@ -103,7 +103,7 @@ export let init = () => {
           }
 
           vsgObj[currentAdSlotElement].lastViewed = currentTime;
-          localStorage.setItem('vsg', JSON.stringify(vsgObj));
+          localStorage.setItem('viewability-data', JSON.stringify(vsgObj));
         }
       });
     });
