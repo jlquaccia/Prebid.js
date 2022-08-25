@@ -44,12 +44,12 @@ export let init = () => {
             if (vsgObj[currentAdSlotElement].lastViewed) delete vsgObj[currentAdSlotElement].lastViewed;
 
             vsgObj[currentAdSlotElement].rendered = vsgObj[currentAdSlotElement].rendered + 1;
-            vsgObj[currentAdSlotElement].updatedAt = new Date();
+            vsgObj[currentAdSlotElement].updatedAt = Date.now().toString();
           } else {
             vsgObj[currentAdSlotElement] = {
               rendered: 1,
               viewed: 0,
-              createdAt: new Date()
+              createdAt: Date.now().toString()
             }
           }
         } else {
@@ -57,7 +57,7 @@ export let init = () => {
             [currentAdSlotElement]: {
               rendered: 1,
               viewed: 0,
-              createdAt: new Date()
+              createdAt: Date.now().toString()
             }
           }
         }
@@ -70,12 +70,12 @@ export let init = () => {
         if (vsgObj) {
           if (vsgObj[currentAdSlotElement]) {
             vsgObj[currentAdSlotElement].viewed = vsgObj[currentAdSlotElement].viewed + 1;
-            vsgObj[currentAdSlotElement].updatedAt = new Date();
+            vsgObj[currentAdSlotElement].updatedAt = Date.now().toString();
           } else {
             vsgObj[currentAdSlotElement] = {
               rendered: 0,
               viewed: 1,
-              createdAt: new Date(),
+              createdAt: Date.now().toString()
             }
           }
         } else {
@@ -83,7 +83,7 @@ export let init = () => {
             [currentAdSlotElement]: {
               rendered: 0,
               viewed: 1,
-              createdAt: new Date()
+              createdAt: Date.now().toString()
             }
           }
         }
