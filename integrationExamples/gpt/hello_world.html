@@ -45,11 +45,14 @@
         });
 
         pbjs.que.push(function() {
-            pbjs.addAdUnits(adUnits);
-            pbjs.requestBids({
-                bidsBackHandler: sendAdserverRequest,
-                timeout: PREBID_TIMEOUT
-            });
+          pbjs.setConfig({
+            refDetectionFreq: 'once'
+          });
+          pbjs.addAdUnits(adUnits);
+          pbjs.requestBids({
+            bidsBackHandler: sendAdserverRequest,
+            timeout: PREBID_TIMEOUT
+          });
         });
 
         function sendAdserverRequest() {
