@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <!--Prebid.js and video player code-->
+  <script async src="//cdn.jsdelivr.net/npm/prebid.js@latest/dist/not-for-prod/prebid.js"></script>
+  <script>
+    var pbjs = pbjs || {};
+    pbjs.que = pbjs.que || [];
+
+    // define invokeVideoPlayer in advance in case we get the bids back from prebid before the entire page loads
+
+    var tempTag = false;
+    var invokeVideoPlayer = function(url) {
+      tempTag = url;
+    }
+
+    // appnexus
+    // var videoAdUnit = {
+    //   code: 'video1',
+    //   mediaTypes: {
+    //     video: {
+    //       context: 'instream',
+    //       playerSize: [640, 480],
+    //       mimes: ['video/mp4'],
+    //       protocols: [1, 2, 3, 4, 5, 6, 7, 8],
+    //       playbackmethod: [2],
+    //       skip: 1
+    //     }
+    //   },
+    //   bids: [{
+    //     bidder: 'appnexus',
+    //     params: {
+    //       placementId: 13232361  //put your placement id here
+    //     }
+    //   }]
+    // };
+
+    // rubicon
+    // var videoAdUnit = {
+    //   code: 'video1',
+    //   mediaTypes: {
+    //     video: {
+    //       context: 'instream',
+    //       playerSize: [640, 480],
+    //       mimes: ['video/mp4', 'video/x-ms-wmv'],
+    //       protocols: [2,3,5,6],
+    //       api: [2],
+    //       maxduration:30,          
+    //       linearity: 1
+    //     }
+    //   },
+    //   bids: [{
+    //     bidder: 'rubicon',                        
+    //     params: {
+    //       accountId: 7780,
+    //       siteId: 87184,
+    //       zoneId: 413290,
+    //       video: {
+    //         language: 'en'
+    //       }
+    //     }
+    //   }]
+    // };
+
+    // pubmatic
+    var videoAdUnit = [{
+      code: 'video1',
+      mediaTypes: {
+        video: {
+          playerSize: [640, 480],
+          context: 'instream',
+          mimes: ['video/mp4','video/x-flv'],
+          skip: 1,
+          minduration: 5,
+          maxduration: 30,
+          startdelay: 5,
+          playbackmethod: [1,3],
+          api: [ 1, 2 ],
+          protocols: [ 2, 3 ],
+          battr: [ 13, 14 ],
+          linearity: 1,
+          placement: 2,
+          minbitrate: 10,
+          maxbitrate: 10
+        }
+      },
+      bids: [{
+        bidder: 'pubmatic',
+        params: {
+          publisherId: '32572',
+          adSlot: '38519891@300x250'
+        }
+      }]
+    }];
+
+    pbjs.que.push(function() {
+      //put your adunits here
+
+      pbjs.addAdUnits(videoAdUnit);
+
+      pbjs.setConfig({
+        debug: true,
+        cache: {
+          url: 'https://prebid.adnxs.com/pbc/v1/cache'
+        }
+      });
+
+      pbjs.requestBids({
+        bidsBackHandler: function(bids) {
+          var videoUrl = pbjs.adServers.dfp.buildVideoUrl({
+            adUnit: videoAdUnit,
+            params: {
+              iu: '/19968336/prebid_cache_video_adunit',
+              cust_params: {
+                section: 'blog',
+                anotherKey: 'anotherValue'
+              },
+              output: 'vast'
+            }
+          });
+          invokeVideoPlayer(videoUrl);
+        }
+      });
+    });
+</script>
+</head>
+<body>
+  <div id="myElement1"></div>
+
+  <!-- Replace this with the correct url for your player -->
+  <script src="https://cdn.jwplayer.com/libraries/dNV4UKpE.js"></script>
+  <script>
+      // we initialize our player instance, specifying the div to load it into
+
+      var playerInstance = jwplayer('myElement1');
+
+      function invokeVideoPlayer(url) {
+          // this calls setup on the player we initialized  
+          // this will use the settings defined in the player we loaded above unless you override them here
+
+          playerInstance.setup({
+              "file": "https://vjs.zencdn.net/v/oceans.mp4",
+              // or "file" could be replaced with "playlist" and a URL
+              // from your JW Platform account in either json or rss format.
+              "width": 640,
+              "height": 480,
+              // we enable vast advertising for this player
+
+              "advertising": {
+                  "client": "vast",
+                  // url is the vast tag url that we passed in when we called invokeVideoPlayer in the header
+
+                  "tag": url
+              },
+          });
+      }
+
+      if (tempTag) {
+          invokeVideoPlayer(tempTag);
+          tempTag = false;
+      }
+
+  </script>
+</body>
+</html>
