@@ -16,6 +16,7 @@ let ongoing = false;
 config.getConfig('refDetectionFreq', (config) => {
   if (config.refDetectionFreq === 'ongoing') {
     ongoing = true;
+    resetRefererInfo();
   }
 });
 
