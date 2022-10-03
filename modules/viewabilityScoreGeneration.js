@@ -7,11 +7,15 @@ const MODULE_NAME = 'viewabilityScoreGeneration';
 const CONFIG_ENABLED = 'enabled';
 const GPT_SLOT_RENDER_ENDED_EVENT = 'slotRenderEnded';
 const GPT_IMPRESSION_VIEWABLE_EVENT = 'impressionViewable';
+const GPT_SLOT_VISIBILITY_CHANGED_EVENT = 'slotVisibilityChanged';
 
-export function makeBidRequestsHook(fn, bidderRequests) {
-  let vsgObj;
-  if (localStorage.getItem('viewability-data')) {
-    vsgObj = JSON.parse(localStorage.getItem('viewability-data'));
+export const getAndParseFromLocalStorage = key => JSON.parse(window.localStorage.getItem(key));
+export const setAndStringifyToLocalStorage = (key, object) => { window.localStorage.setItem(key, JSON.stringify(object)); };
+
+let vsgObj = getAndParseFromLocalStorage('viewability-data');
+
+export const makeBidRequestsHook = (fn, bidderRequests) => {
+  if (vsgObj) {
     bidderRequests.forEach(bidderRequest => {
       bidderRequest.bids.forEach(bid => {
         if (vsgObj[bid.adUnitCode]) bid.bidViewability = vsgObj[bid.adUnitCode];
@@ -20,6 +24,73 @@ export function makeBidRequestsHook(fn, bidderRequests) {
   }
 
   fn(bidderRequests);
+}
+
+export const gptSlotRenderEndedHandler = (adSlotElementId, setToLocalStorageCb) => {
+  if (vsgObj) {
+    if (vsgObj[adSlotElementId]) {
+      if (vsgObj[adSlotElementId].lastViewed) delete vsgObj[adSlotElementId].lastViewed;
+
+      vsgObj[adSlotElementId].rendered = vsgObj[adSlotElementId].rendered + 1;
+      vsgObj[adSlotElementId].updatedAt = Date.now().toString();
+    } else {
+      vsgObj[adSlotElementId] = {
+        rendered: 1,
+        viewed: 0,
+        createdAt: Date.now().toString()
+      }
+    }
+  } else {
+    vsgObj = {
+      [adSlotElementId]: {
+        rendered: 1,
+        viewed: 0,
+        createdAt: Date.now().toString()
+      }
+    }
+  }
+
+  setToLocalStorageCb('viewability-data', vsgObj);
+};
+
+export const gptImpressionViewableHandler = (adSlotElementId, setToLocalStorageCb) => {
+  if (vsgObj) {
+    if (vsgObj[adSlotElementId]) {
+      vsgObj[adSlotElementId].viewed = vsgObj[adSlotElementId].viewed + 1;
+      vsgObj[adSlotElementId].updatedAt = Date.now().toString();
+    } else {
+      vsgObj[adSlotElementId] = {
+        rendered: 0,
+        viewed: 1,
+        createdAt: Date.now().toString()
+      }
+    }
+  } else {
+    vsgObj = {
+      [adSlotElementId]: {
+        rendered: 0,
+        viewed: 1,
+        createdAt: Date.now().toString()
+      }
+    }
+  }
+
+  setToLocalStorageCb('viewability-data', vsgObj);
+};
+
+export const gptSlotVisibilityChangedHandler = (adSlotElementId, inViewPercentage, setToLocalStorageCb) => {
+  if (inViewPercentage > 50) {
+    const lastStarted = vsgObj[adSlotElementId].lastViewed;
+    const currentTime = performance.now();
+
+    if (lastStarted) {
+      const diff = currentTime - lastStarted;
+      vsgObj[adSlotElementId].totalViewTime = (vsgObj[adSlotElementId].totalViewTime || 0) + diff;
+    }
+
+    vsgObj[adSlotElementId].lastViewed = currentTime;
+    setToLocalStorageCb('viewability-data', vsgObj);
+  }
 }
 
 export let init = () => {
@@ -32,82 +103,27 @@ export let init = () => {
       return;
     }
 
-    let vsgObj = JSON.parse(localStorage.getItem('viewability-data'));
     // add the GPT event listeners
     window.googletag = window.googletag || {};
     window.googletag.cmd = window.googletag.cmd || [];
     window.googletag.cmd.push(() => {
       window.googletag.pubads().addEventListener(GPT_SLOT_RENDER_ENDED_EVENT, function(event) {
         const currentAdSlotElement = event.slot.getSlotElementId();
-        if (vsgObj) {
-          if (vsgObj[currentAdSlotElement]) {
-            if (vsgObj[currentAdSlotElement].lastViewed) delete vsgObj[currentAdSlotElement].lastViewed;
-
-            vsgObj[currentAdSlotElement].rendered = vsgObj[currentAdSlotElement].rendered + 1;
-            vsgObj[currentAdSlotElement].updatedAt = Date.now().toString();
-          } else {
-            vsgObj[currentAdSlotElement] = {
-              rendered: 1,
-              viewed: 0,
-              createdAt: Date.now().toString()
-            }
-          }
-        } else {
-          vsgObj = {
-            [currentAdSlotElement]: {
-              rendered: 1,
-              viewed: 0,
-              createdAt: Date.now().toString()
-            }
-          }
-        }
-
-        localStorage.setItem('viewability-data', JSON.stringify(vsgObj));
+        gptSlotRenderEndedHandler(currentAdSlotElement, setAndStringifyToLocalStorage);
       });
 
       window.googletag.pubads().addEventListener(GPT_IMPRESSION_VIEWABLE_EVENT, function(event) {
         const currentAdSlotElement = event.slot.getSlotElementId();
-        if (vsgObj) {
-          if (vsgObj[currentAdSlotElement]) {
-            vsgObj[currentAdSlotElement].viewed = vsgObj[currentAdSlotElement].viewed + 1;
-            vsgObj[currentAdSlotElement].updatedAt = Date.now().toString();
-          } else {
-            vsgObj[currentAdSlotElement] = {
-              rendered: 0,
-              viewed: 1,
-              createdAt: Date.now().toString()
-            }
-          }
-        } else {
-          vsgObj = {
-            [currentAdSlotElement]: {
-              rendered: 0,
-              viewed: 1,
-              createdAt: Date.now().toString()
-            }
-          }
-        }
-
-        localStorage.setItem('viewability-data', JSON.stringify(vsgObj));
+        gptImpressionViewableHandler(currentAdSlotElement, setAndStringifyToLocalStorage);
       });
 
-      window.googletag.pubads().addEventListener('slotVisibilityChanged', function(event) {
-        if (event.inViewPercentage > 50) {
-          const currentAdSlotElement = event.slot.getSlotElementId();
-          const lastStarted = vsgObj[currentAdSlotElement].lastViewed;
-          const currentTime = performance.now();
-
-          if (lastStarted) {
-            const diff = currentTime - lastStarted;
-            vsgObj[currentAdSlotElement].totalViewTime = (vsgObj[currentAdSlotElement].totalViewTime || 0) + diff;
-          }
-
-          vsgObj[currentAdSlotElement].lastViewed = currentTime;
-          localStorage.setItem('viewability-data', JSON.stringify(vsgObj));
-        }
+      window.googletag.pubads().addEventListener(GPT_SLOT_VISIBILITY_CHANGED_EVENT, function(event) {
+        const currentAdSlotElement = event.slot.getSlotElementId();
+        gptSlotVisibilityChangedHandler(currentAdSlotElement, event.inViewPercentage, setAndStringifyToLocalStorage);
       });
     });
   });
+
   adapterManager.makeBidRequests.after(makeBidRequestsHook);
 }
 
