@@ -397,6 +397,7 @@ $$PREBID_GLOBAL$$.setTargetingForGPTAsync = function (adUnit, customSlotMatching
     return;
   }
 
+  // get our ad unit codes
   let targetingSet = targeting.getAllTargeting(adUnit);
 
   // first reset any old targeting
