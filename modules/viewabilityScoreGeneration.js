@@ -1,7 +1,9 @@
 import {config} from '../src/config.js';
 import adapterManager from '../src/adapterManager.js';
+import { targeting } from '../src/targeting.js';
 import * as events from '../src/events.js';
 import CONSTANTS from '../src/constants.json';
+import { isAdUnitCodeMatchingSlot } from '../src/utils.js';
 
 const MODULE_NAME = 'viewabilityScoreGeneration';
 const CONFIG_ENABLED = 'enabled';
@@ -32,12 +34,12 @@ export const gptSlotRenderEndedHandler = (adSlotElementId, setToLocalStorageCb) 
       if (vsgObj[adSlotElementId].lastViewed) delete vsgObj[adSlotElementId].lastViewed;
 
       vsgObj[adSlotElementId].rendered = vsgObj[adSlotElementId].rendered + 1;
-      vsgObj[adSlotElementId].updatedAt = Date.now().toString();
+      vsgObj[adSlotElementId].updatedAt = Date.now();
     } else {
       vsgObj[adSlotElementId] = {
         rendered: 1,
         viewed: 0,
-        createdAt: Date.now().toString()
+        createdAt: Date.now()
       }
     }
   } else {
@@ -45,7 +47,7 @@ export const gptSlotRenderEndedHandler = (adSlotElementId, setToLocalStorageCb) 
       [adSlotElementId]: {
         rendered: 1,
         viewed: 0,
-        createdAt: Date.now().toString()
+        createdAt: Date.now()
       }
     }
   }
@@ -57,12 +59,12 @@ export const gptImpressionViewableHandler = (adSlotElementId, setToLocalStorageC
   if (vsgObj) {
     if (vsgObj[adSlotElementId]) {
       vsgObj[adSlotElementId].viewed = vsgObj[adSlotElementId].viewed + 1;
-      vsgObj[adSlotElementId].updatedAt = Date.now().toString();
+      vsgObj[adSlotElementId].updatedAt = Date.now();
     } else {
       vsgObj[adSlotElementId] = {
         rendered: 0,
         viewed: 1,
-        createdAt: Date.now().toString()
+        createdAt: Date.now()
       }
     }
   } else {
@@ -70,7 +72,7 @@ export const gptImpressionViewableHandler = (adSlotElementId, setToLocalStorageC
       [adSlotElementId]: {
         rendered: 0,
         viewed: 1,
-        createdAt: Date.now().toString()
+        createdAt: Date.now()
       }
     }
   }
@@ -85,7 +87,7 @@ export const gptSlotVisibilityChangedHandler = (adSlotElementId, inViewPercentag
 
     if (lastStarted) {
       const diff = currentTime - lastStarted;
-      vsgObj[adSlotElementId].totalViewTime = (vsgObj[adSlotElementId].totalViewTime || 0) + diff;
+      vsgObj[adSlotElementId].totalViewTime = Math.round((vsgObj[adSlotElementId].totalViewTime || 0) + (diff / 1000));
     }
 
     vsgObj[adSlotElementId].lastViewed = currentTime;
@@ -121,6 +123,38 @@ export let init = () => {
         const currentAdSlotElement = event.slot.getSlotElementId();
         gptSlotVisibilityChangedHandler(currentAdSlotElement, event.inViewPercentage, setAndStringifyToLocalStorage);
       });
+    });
+  });
+
+  events.on(CONSTANTS.EVENTS.SET_TARGETING, () => {
+    const vsgModConfig = config.getConfig('viewabilityScoreGeneration');
+    let targetingSet = targeting.getAllTargeting();
+
+    let vsgObj;
+    if (localStorage.getItem('viewability-data')) {
+      vsgObj = JSON.parse(localStorage.getItem('viewability-data'));
+      Object.keys(targetingSet).forEach(targetKey => {
+        if (
+          vsgObj[targetKey] &&
+          Object.keys(targetingSet[targetKey]).length !== 0 &&
+          vsgObj[targetKey].hasOwnProperty('viewed') &&
+          vsgObj[targetKey].hasOwnProperty('rendered')
+        ) {
+          const bvs = Math.round((vsgObj[targetKey].viewed / vsgObj[targetKey].rendered) * 10) / 10;
+          const bvb = bvs > 0.7 ? 'HIGH' : bvs < 0.5 ? 'LOW' : 'MEDIUM';
+          const targetingScoreKey = vsgModConfig.targetingScoreKey ? vsgModConfig.targetingScoreKey : 'bidViewabilityScore';
+          const targetingBucketKey = vsgModConfig.targetingBucketKey ? vsgModConfig.targetingBucketKey : 'bidViewabilityBucket';
+
+          targetingSet[targetKey][targetingScoreKey] = bvs;
+          targetingSet[targetKey][targetingBucketKey] = bvb;
+        }
+      });
+    }
+
+    window.googletag.pubads().getSlots().forEach(slot => {
+      Object.keys(targetingSet).filter(isAdUnitCodeMatchingSlot(slot)).forEach(targetId => {
+        slot.updateTargetingFromMap(targetingSet[targetId])
+      })
     });
   });
 

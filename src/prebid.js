@@ -397,35 +397,7 @@ $$PREBID_GLOBAL$$.setTargetingForGPTAsync = function (adUnit, customSlotMatching
     return;
   }
 
-  const vsgModConfig = config.getConfig('viewabilityScoreGeneration');
-  // get our ad unit codes
   let targetingSet = targeting.getAllTargeting(adUnit);
-
-  // eslint-disable-next-line no-console
-  console.log('targetingSet: ', targetingSet);
-  // eslint-disable-next-line no-console
-  console.log('vsgModConfig: ', vsgModConfig);
-
-  let vsgObj;
-  if (localStorage.getItem('viewability-data')) {
-    vsgObj = JSON.parse(localStorage.getItem('viewability-data'));
-    Object.keys(targetingSet).forEach(targetKey => {
-      if (
-        vsgObj[targetKey] &&
-        Object.keys(targetingSet[targetKey]).length !== 0 &&
-        vsgObj[targetKey].hasOwnProperty('viewed') &&
-        vsgObj[targetKey].hasOwnProperty('rendered')
-      ) {
-        const bvs = Math.round((vsgObj[targetKey].viewed / vsgObj[targetKey].rendered) * 10) / 10;
-        const bvb = bvs > 0.7 ? 'HIGH' : bvs < 0.5 ? 'LOW' : 'MEDIUM';
-        const targetingScoreKey = vsgModConfig.targetingScoreKey ? vsgModConfig.targetingScoreKey : 'bidViewabilityScore';
-        const targetingBucketKey = vsgModConfig.targetingBucketKey ? vsgModConfig.targetingBucketKey : 'bidViewabilityBucket';
-
-        targetingSet[targetKey][targetingScoreKey] = bvs;
-        targetingSet[targetKey][targetingBucketKey] = bvb;
-      }
-    });
-  }
 
   // first reset any old targeting
   targeting.resetPresetTargeting(adUnit, customSlotMatching);
