@@ -6,7 +6,8 @@ import CONSTANTS from '../src/constants.json';
 import { isAdUnitCodeMatchingSlot } from '../src/utils.js';
 
 const MODULE_NAME = 'viewabilityScoreGeneration';
-const CONFIG_ENABLED = 'enabled';
+const ENABLED = 'enabled';
+const TARGETING = 'targeting';
 const GPT_SLOT_RENDER_ENDED_EVENT = 'slotRenderEnded';
 const GPT_IMPRESSION_VIEWABLE_EVENT = 'impressionViewable';
 const GPT_SLOT_VISIBILITY_CHANGED_EVENT = 'slotVisibilityChanged';
@@ -96,69 +97,66 @@ export const gptSlotVisibilityChangedHandler = (adSlotElementId, inViewPercentag
 }
 
 export let init = () => {
-  events.on(CONSTANTS.EVENTS.AUCTION_INIT, () => {
-    // read the config for the module
-    const globalModuleConfig = config.getConfig(MODULE_NAME) || {};
-    // do nothing if module-config.enabled is not set to true
-    // this way we are adding a way for bidders to know (using pbjs.getConfig('bidViewability').enabled === true) whether this module is added in build and is enabled
-    if (globalModuleConfig[CONFIG_ENABLED] !== true) {
+  config.getConfig(MODULE_NAME, (vsgConfig) => {
+    if (vsgConfig[MODULE_NAME][ENABLED] !== true) {
       return;
     }
 
-    // add the GPT event listeners
-    window.googletag = window.googletag || {};
-    window.googletag.cmd = window.googletag.cmd || [];
-    window.googletag.cmd.push(() => {
-      window.googletag.pubads().addEventListener(GPT_SLOT_RENDER_ENDED_EVENT, function(event) {
-        const currentAdSlotElement = event.slot.getSlotElementId();
-        gptSlotRenderEndedHandler(currentAdSlotElement, setAndStringifyToLocalStorage);
-      });
+    events.on(CONSTANTS.EVENTS.AUCTION_INIT, () => {
+      // add the GPT event listeners
+      window.googletag = window.googletag || {};
+      window.googletag.cmd = window.googletag.cmd || [];
+      window.googletag.cmd.push(() => {
+        window.googletag.pubads().addEventListener(GPT_SLOT_RENDER_ENDED_EVENT, function(event) {
+          const currentAdSlotElement = event.slot.getSlotElementId();
+          gptSlotRenderEndedHandler(currentAdSlotElement, setAndStringifyToLocalStorage);
+        });
 
-      window.googletag.pubads().addEventListener(GPT_IMPRESSION_VIEWABLE_EVENT, function(event) {
-        const currentAdSlotElement = event.slot.getSlotElementId();
-        gptImpressionViewableHandler(currentAdSlotElement, setAndStringifyToLocalStorage);
-      });
+        window.googletag.pubads().addEventListener(GPT_IMPRESSION_VIEWABLE_EVENT, function(event) {
+          const currentAdSlotElement = event.slot.getSlotElementId();
+          gptImpressionViewableHandler(currentAdSlotElement, setAndStringifyToLocalStorage);
+        });
 
-      window.googletag.pubads().addEventListener(GPT_SLOT_VISIBILITY_CHANGED_EVENT, function(event) {
-        const currentAdSlotElement = event.slot.getSlotElementId();
-        gptSlotVisibilityChangedHandler(currentAdSlotElement, event.inViewPercentage, setAndStringifyToLocalStorage);
+        window.googletag.pubads().addEventListener(GPT_SLOT_VISIBILITY_CHANGED_EVENT, function(event) {
+          const currentAdSlotElement = event.slot.getSlotElementId();
+          gptSlotVisibilityChangedHandler(currentAdSlotElement, event.inViewPercentage, setAndStringifyToLocalStorage);
+        });
       });
     });
-  });
 
-  events.on(CONSTANTS.EVENTS.SET_TARGETING, () => {
-    const vsgModConfig = config.getConfig('viewabilityScoreGeneration');
-    let targetingSet = targeting.getAllTargeting();
+    if (vsgConfig.viewabilityScoreGeneration?.targeting?.enabled) {
+      events.on(CONSTANTS.EVENTS.SET_TARGETING, () => {
+        let targetingSet = targeting.getAllTargeting();
 
-    let vsgObj;
-    if (localStorage.getItem('viewability-data')) {
-      vsgObj = JSON.parse(localStorage.getItem('viewability-data'));
-      Object.keys(targetingSet).forEach(targetKey => {
-        if (
-          vsgObj[targetKey] &&
-          Object.keys(targetingSet[targetKey]).length !== 0 &&
-          vsgObj[targetKey].hasOwnProperty('viewed') &&
-          vsgObj[targetKey].hasOwnProperty('rendered')
-        ) {
-          const bvs = Math.round((vsgObj[targetKey].viewed / vsgObj[targetKey].rendered) * 10) / 10;
-          const bvb = bvs > 0.7 ? 'HIGH' : bvs < 0.5 ? 'LOW' : 'MEDIUM';
-          const targetingScoreKey = vsgModConfig.targetingScoreKey ? vsgModConfig.targetingScoreKey : 'bidViewabilityScore';
-          const targetingBucketKey = vsgModConfig.targetingBucketKey ? vsgModConfig.targetingBucketKey : 'bidViewabilityBucket';
+        if (localStorage.getItem('viewability-data')) {
+          Object.keys(targetingSet).forEach(targetKey => {
+            if (
+              vsgObj[targetKey] &&
+              Object.keys(targetingSet[targetKey]).length !== 0 &&
+              vsgObj[targetKey].hasOwnProperty('viewed') &&
+              vsgObj[targetKey].hasOwnProperty('rendered')
+            ) {
+              const bvs = Math.round((vsgObj[targetKey].viewed / vsgObj[targetKey].rendered) * 10) / 10;
+              const bvb = bvs > 0.7 ? 'HIGH' : bvs < 0.5 ? 'LOW' : 'MEDIUM';
+              const targetingScoreKey = vsgConfig[MODULE_NAME][TARGETING].scoreKey ? vsgConfig[MODULE_NAME][TARGETING].scoreKey : 'bidViewabilityScore';
+              const targetingBucketKey = vsgConfig[MODULE_NAME][TARGETING].bucketKey ? vsgConfig[MODULE_NAME][TARGETING].bucketKey : 'bidViewabilityBucket';
 
-          targetingSet[targetKey][targetingScoreKey] = bvs;
-          targetingSet[targetKey][targetingBucketKey] = bvb;
+              targetingSet[targetKey][targetingScoreKey] = bvs;
+              targetingSet[targetKey][targetingBucketKey] = bvb;
+            }
+          });
         }
+
+        window.googletag.pubads().getSlots().forEach(slot => {
+          Object.keys(targetingSet).filter(isAdUnitCodeMatchingSlot(slot)).forEach(targetId => {
+            slot.updateTargetingFromMap(targetingSet[targetId])
+          })
+        });
       });
     }
 
-    window.googletag.pubads().getSlots().forEach(slot => {
-      Object.keys(targetingSet).filter(isAdUnitCodeMatchingSlot(slot)).forEach(targetId => {
-        slot.updateTargetingFromMap(targetingSet[targetId])
-      })
-    });
+    adapterManager.makeBidRequests.after(makeBidRequestsHook);
   });
-
-  adapterManager.makeBidRequests.after(makeBidRequestsHook);
 }
 
 init();

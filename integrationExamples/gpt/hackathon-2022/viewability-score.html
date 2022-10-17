@@ -130,8 +130,11 @@
       pbjs.setConfig({
         viewabilityScoreGeneration: {
           enabled: true,
-          targetingScoreKey: 'viewScore',
-          targetingBucketKey: 'bucketScore'
+          targeting: {
+            enabled: true,
+            scoreKey: 'viewScore',
+            bucketKey: 'bucketScore'
+          }
         },
         floors: {
           enforcement: {
@@ -180,10 +183,9 @@
     }
 
     function getBidViewabilityBucketsPerBidRequest (bidRequest, bidResponse) {
-      let vsgObj;
+      let vsgObj = JSON.parse(localStorage.getItem('viewability-data'));
       let result = false;
-      if (localStorage.getItem('viewability-data')) {
-        vsgObj = JSON.parse(localStorage.getItem('viewability-data'));
+      if (vsgObj && vsgObj[bidRequest.adUnitCode]) {
         const bvs = Math.round((vsgObj[bidRequest.adUnitCode].viewed / vsgObj[bidRequest.adUnitCode].rendered) * 10) / 10;
         const bvb = bvs > 0.7 ? 'HIGH' : bvs < 0.5 ? 'LOW' : 'MEDIUM';
         result = bvb;
