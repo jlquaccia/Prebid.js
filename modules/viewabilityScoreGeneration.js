@@ -125,7 +125,7 @@ export let init = () => {
     });
 
     if (vsgConfig.viewabilityScoreGeneration?.targeting?.enabled) {
-      events.on(CONSTANTS.EVENTS.SET_TARGETING, () => {
+      events.on(CONSTANTS.EVENTS.AUCTION_END, () => {
         let targetingSet = targeting.getAllTargeting();
 
         if (localStorage.getItem('viewability-data')) {
