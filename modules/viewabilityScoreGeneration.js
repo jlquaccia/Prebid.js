@@ -96,6 +96,24 @@ export const gptSlotVisibilityChangedHandler = (adSlotElementId, inViewPercentag
   }
 };
 
+export const calculateBucket = (bucketCategories, score) => {
+  let bucketCategoriesObject = {};
+  let result;
+
+  bucketCategories.forEach((category, index) => {
+    bucketCategoriesObject[category] = Math.round(((index + 1) / bucketCategories.length) * 10) / 10;
+  });
+
+  for (let i = 0; i < bucketCategories.length; i++) {
+    if (score <= bucketCategoriesObject[bucketCategories[i]]) {
+      result = bucketCategories[i];
+      break;
+    }
+  }
+
+  return result;
+};
+
 export const addViewabilityTargeting = (globalConfig, targetingSet, vsgLocalStorageObj, cb) => {
   Object.keys(targetingSet).forEach(targetKey => {
     if (
@@ -104,13 +122,18 @@ export const addViewabilityTargeting = (globalConfig, targetingSet, vsgLocalStor
       vsgLocalStorageObj[targetKey].hasOwnProperty('viewed') &&
       vsgLocalStorageObj[targetKey].hasOwnProperty('rendered')
     ) {
-      const bvs = Math.round((vsgLocalStorageObj[targetKey].viewed / vsgLocalStorageObj[targetKey].rendered) * 10) / 10;
-      const bvb = bvs > 0.7 ? 'HIGH' : bvs < 0.5 ? 'LOW' : 'MEDIUM';
-      const targetingScoreKey = globalConfig[MODULE_NAME][TARGETING].scoreKey ? globalConfig[MODULE_NAME][TARGETING].scoreKey : 'bidViewabilityScore';
-      const targetingBucketKey = globalConfig[MODULE_NAME][TARGETING].bucketKey ? globalConfig[MODULE_NAME][TARGETING].bucketKey : 'bidViewabilityBucket';
+      const viewabilityScore = Math.round((vsgLocalStorageObj[targetKey].viewed / vsgLocalStorageObj[targetKey].rendered) * 10) / 10;
+      const viewabilityBucket = calculateBucket(globalConfig[MODULE_NAME][TARGETING].bucketCategories, viewabilityScore);
 
-      targetingSet[targetKey][targetingScoreKey] = bvs;
-      targetingSet[targetKey][targetingBucketKey] = bvb;
+      if (globalConfig[MODULE_NAME][TARGETING].score) {
+        const targetingScoreKey = globalConfig[MODULE_NAME][TARGETING].scoreKey ? globalConfig[MODULE_NAME][TARGETING].scoreKey : 'bidViewabilityScore';
+        targetingSet[targetKey][targetingScoreKey] = viewabilityScore;
+      }
+
+      if (globalConfig[MODULE_NAME][TARGETING].bucket) {
+        const targetingBucketKey = globalConfig[MODULE_NAME][TARGETING].bucketKey ? globalConfig[MODULE_NAME][TARGETING].bucketKey : 'bidViewabilityBucket';
+        targetingSet[targetKey][targetingBucketKey] = viewabilityBucket;
+      }
     }
   });
 
@@ -158,15 +181,41 @@ export const setGptEventHandlers = () => {
   });
 };
 
+const initConfigDefaults = config => {
+  config[MODULE_NAME][TARGETING].enabled =
+    typeof config.viewabilityScoreGeneration?.targeting?.enabled === 'boolean'
+      ? config.viewabilityScoreGeneration?.targeting?.enabled
+      : false;
+
+  config[MODULE_NAME][TARGETING].bucketCategories =
+    config.viewabilityScoreGeneration?.targeting?.bucketCategories && config.viewabilityScoreGeneration?.targeting?.bucketCategories.every(i => typeof i === 'string')
+      ? config.viewabilityScoreGeneration?.targeting?.bucketCategories
+      : ['LOW', 'MEDIUM', 'HIGH'];
+
+  config[MODULE_NAME][TARGETING].score =
+    typeof config.viewabilityScoreGeneration?.targeting?.score === 'boolean'
+      ? config.viewabilityScoreGeneration?.targeting?.score
+      : true;
+
+  config[MODULE_NAME][TARGETING].bucket =
+    typeof config.viewabilityScoreGeneration?.targeting?.bucket === 'boolean'
+      ? config.viewabilityScoreGeneration?.targeting?.bucket
+      : true;
+};
+
 export let init = (setGptCb, setTargetingCb) => {
   config.getConfig(MODULE_NAME, (globalConfig) => {
     if (globalConfig[MODULE_NAME][ENABLED] !== true) {
       return;
     }
 
+    initConfigDefaults(globalConfig);
     setGptCb();
 
-    if (globalConfig.viewabilityScoreGeneration?.targeting?.enabled) {
+    if (
+      globalConfig.viewabilityScoreGeneration?.targeting?.enabled &&
+      (globalConfig.viewabilityScoreGeneration?.targeting?.score || globalConfig.viewabilityScoreGeneration?.targeting?.bucket)
+    ) {
       setTargetingCb(globalConfig);
     }
 

@@ -58,18 +58,24 @@ pbjs.setConfig({
 		enabled:  true,
 		targeting: {
 			enabled:  true,
+			score: false,
 			scoreKey:  'viewScore',
-			bucketKey:  'bucketScore'
+			bucket: true,
+			bucketKey:  'bucketScore',
+			bucketCategories: ['VERY LOW', 'LOW', 'MEDIUM', 'HIGH', 'VERY HIGH']
 		}
 	},
 });
 ```
-|Parameter|Type|Description|
-| - | - | - |
-|enabled|boolean|Determine whether the entire Viewability Score Generation module is on or off.
-|targeting.enabled|boolean|Turns on/off feature support to add additional targeting key/value pairings to be sent to GAM.  When enabled the `bidViewabilityScore` and `bidViewabilityBucket` K/V's will be sent.
-|targeting.scoreKey|string|Optional custom key name to be used instead of the default, `bidViewabilityScore`
-|targeting.bucketKey|string|Optional custom key name to be used instead of the default, `bidViewabilityBucket`
+|Parameter|Type|Description|Default|
+| - | - | - | - |
+|enabled|boolean|Determine whether the entire viewabilityScoreGeneration module is on or off.|false|
+|targeting.enabled|boolean|Turns on/off feature support to add additional targeting key/value pairings to be sent to GAM.  When enabled the `bidViewabilityScore` and `bidViewabilityBucket` K/V's will be sent (providing custom key names weren't designated via the `targeting.scoreKey` or `targeting.bucketKey` config options.|false|
+|targeting.score|boolean|Ability to optionally pass/not pass the viewability score key/value pairing to GAM.|true|
+|targeting.scoreKey|string|Optional custom key name to be used when sending the viewabiilty score to GAM.|`bidViewabilityScore`|
+|targeting.bucket|string|Ability to optionally pass/not pass the viewability bucket key/value pairing to GAM.|true|
+|targeting.bucketKey|string|Optional custom key name to be used when sending the viewabiilty bucket to GAM.|`bidViewabilityBucket`|
+|targeting.bucketCategories|string[]|Select the bucket category names you would like to map viewability scores to (must be in ascending order).|`['LOW', 'MEDIUM', 'HIGH']`|
 
 # Targeting:
 When enabled, the Prebid JS `AUCTION_END` event is listened for and once emitted, the following Key/Value pairings will be configured and passed with selected bids with GAM requests:
@@ -79,11 +85,14 @@ When enabled, the Prebid JS `AUCTION_END` event is listened for and once emitted
 - Example: `bidViewabilityScore=0.7`
 
 #### Bid Viewability Bucket
-- Determines what viewability bucket an ad slot fits in to based on it's viewability score: `HIGH`, `MEDIUM` or `LOW`
-	- Scores > 0.7 = HIGH
-	- Scores < 0.5 = LOW
-	- Everything else = MEDIUM
-- Example: `bidViewabilityScore=HIGH`
+- Determines what viewability bucket an ad slot fits in to based on it's viewability score and the bucketCategories designated in the config. Bucket category ranges will automatically be calculated based upon the number of categories specified in the config (everything will be rounded to 1 decimal place).
+- Example: If bucketCategories is set to ['VERY LOW', 'LOW', 'MEDIUM', 'HIGH', 'VERY HIGH'] and an ad slot has a viewability score of 0.3, the logic would be as follows:
+    - 'VERY LOW' = 0 - 0.2
+    - 'LOW' = 0.21 - 0.4
+    - 'MEDIUM' = 0.41 - 0.6
+    - 'HIGH' = 0.61 - 0.8
+    - 'VERY HIGH' = 0.81 - 1
+- Result `bidViewabilityScore=LOW`
 
 # Dynamic Floors:
 Set dynamic floors based on viewability buckets with custom matchers.
@@ -93,8 +102,11 @@ pbjs.setConfig({
 		enabled:  true,
 		targeting: {
 			enabled:  true,
+			score: false,
 			scoreKey:  'viewScore',
-			bucketKey:  'bucketScore'
+			bucket: true,
+			bucketKey:  'bucketScore',
+			bucketCategories: ['VERY LOW', 'LOW', 'MEDIUM', 'HIGH', 'VERY HIGH']
 		}
 	},
 	floors: {

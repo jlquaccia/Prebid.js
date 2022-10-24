@@ -132,8 +132,11 @@
           enabled: true,
           targeting: {
             enabled: true,
+            // score: false,
             scoreKey: 'viewScore',
-            bucketKey: 'bucketScore'
+            // bucket: false,
+            bucketKey: 'bucketScore',
+            bucketCategories: ['VERY LOW', 'LOW', 'MEDIUM', 'HIGH', 'VERY HIGH']
           }
         },
         floors: {
@@ -161,7 +164,7 @@
             bidViewabilityBucketing : getBidViewabilityBucketsPerBidRequest
           }
         },
-        debug: true
+        debug: false
       });
 
       pbjs.addAdUnits(adUnits);
