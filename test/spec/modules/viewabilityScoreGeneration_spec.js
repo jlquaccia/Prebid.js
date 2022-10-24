@@ -121,4 +121,143 @@ describe('viewabilityScoreGeneration', function() {
       expect(bidderRequests[2].bids[0].bidViewability).to.be.ok;
     });
   });
+
+  describe('configuration', function() {
+    const sandbox = sinon.sandbox.create();
+
+    afterEach(function() {
+      sandbox.restore();
+    });
+
+    it('should not load the module if it is not enabled in the config', function() {
+      const setGptEventHandlersSpy = sandbox.spy(viewabilityScoreGeneration, 'setGptEventHandlers');
+      const setViewabilityTargetingKeysSpy = sandbox.spy(viewabilityScoreGeneration, 'setViewabilityTargetingKeys');
+
+      viewabilityScoreGeneration.init(setGptEventHandlersSpy, setViewabilityTargetingKeysSpy);
+      sinon.assert.notCalled(setGptEventHandlersSpy);
+    });
+
+    it('should utlize the viewability targeting feature if enabled', function() {
+      const setGptEventHandlersSpy = sandbox.spy(viewabilityScoreGeneration, 'setGptEventHandlers');
+      const setViewabilityTargetingKeysSpy = sandbox.spy(viewabilityScoreGeneration, 'setViewabilityTargetingKeys');
+
+      viewabilityScoreGeneration.init(setGptEventHandlersSpy, setViewabilityTargetingKeysSpy);
+      config.setConfig({
+        viewabilityScoreGeneration: {
+          enabled: true,
+          targeting: {
+            enabled: true
+          }
+        }
+      });
+      sinon.assert.calledOnce(setGptEventHandlersSpy);
+      sinon.assert.calledOnce(setViewabilityTargetingKeysSpy);
+    });
+
+    it('should not utlize the viewability targeting feature if not enabled', function() {
+      const setGptEventHandlersSpy = sandbox.spy(viewabilityScoreGeneration, 'setGptEventHandlers');
+      const setViewabilityTargetingKeysSpy = sandbox.spy(viewabilityScoreGeneration, 'setViewabilityTargetingKeys');
+
+      viewabilityScoreGeneration.init(setGptEventHandlersSpy, setViewabilityTargetingKeysSpy);
+      config.setConfig({
+        viewabilityScoreGeneration: {
+          enabled: true
+        }
+      });
+      sinon.assert.calledOnce(setGptEventHandlersSpy);
+      sinon.assert.notCalled(setViewabilityTargetingKeysSpy);
+    });
+  });
+
+  describe('targeting', function() {
+    const sandbox = sinon.sandbox.create();
+
+    afterEach(function() {
+      sandbox.restore();
+    });
+
+    it('should append key/value pairings correctly', function() {
+      const updateGptWithViewabilityTargetingSpy = sandbox.spy(viewabilityScoreGeneration, 'updateGptWithViewabilityTargeting');
+
+      const config = {
+        'viewabilityScoreGeneration': {
+          'enabled': true,
+          'targeting': {
+            'enabled': true,
+            'scoreKey': 'some-custom-key-name',
+            // 'bucketKey': 'some-other-custom-key-name'
+            // some-other-custom-key-name is the custom key name, since the line above is commented out, the default key name of bidViewabilityBucket should be used
+          }
+        }
+      };
+
+      const targetingSet = {
+        'ad-slot-id-1': {
+          'hb_format': 'banner',
+          'hb_bidder': 'rubicon'
+        },
+        'ad-slot-id-2': {
+          'hb_format': 'banner',
+          'hb_bidder': 'pubmatic'
+        },
+        'ad-slot-id-3': {
+          'hb_format': 'banner',
+          'hb_bidder': 'rubicon'
+        }
+      };
+
+      const vsgLocalStorageObj = {
+        'ad-slot-id-1': {
+          'rendered': 49,
+          'viewed': 36,
+          'createdAt': 1666030591160,
+          'totalViewTime': 20275,
+          'updatedAt': 1666389968134,
+          'lastViewed': 2322.699999988079
+        },
+        'ad-slot-id-2': {
+          'rendered': 49,
+          'viewed': 40,
+          'createdAt': 1666030591179,
+          'updatedAt': 1666389967741,
+          'totalViewTime': 48674,
+          'lastViewed': 1932.5
+        },
+        'ad-slot-id-3': {
+          'rendered': 49,
+          'viewed': 40,
+          'createdAt': 1666030591231,
+          'updatedAt': 1666389967796,
+          'totalViewTime': 48658,
+          'lastViewed': 1988
+        }
+      }
+
+      const result = {
+        'ad-slot-id-1': {
+          'bidViewabilityBucket': 'MEDIUM',
+          'hb_bidder': 'rubicon',
+          'hb_format': 'banner',
+          'some-custom-key-name': 0.7
+        },
+        'ad-slot-id-2': {
+          'bidViewabilityBucket': 'HIGH',
+          'hb_bidder': 'pubmatic',
+          'hb_format': 'banner',
+          'some-custom-key-name': 0.8
+        },
+        'ad-slot-id-3': {
+          'bidViewabilityBucket': 'HIGH',
+          'hb_bidder': 'rubicon',
+          'hb_format': 'banner',
+          'some-custom-key-name': 0.8
+        }
+      };
+
+      viewabilityScoreGeneration.addViewabilityTargeting(config, targetingSet, vsgLocalStorageObj, updateGptWithViewabilityTargetingSpy);
+      sinon.assert.calledOnce(updateGptWithViewabilityTargetingSpy); // make sure this func is called only once so that relative gpt ad slots are update only once
+      const spyCall = updateGptWithViewabilityTargetingSpy.getCall(0);
+      expect(spyCall.args[0]).to.deep.equal(result);
+    });
+  });
 });

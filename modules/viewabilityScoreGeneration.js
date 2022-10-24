@@ -94,69 +94,84 @@ export const gptSlotVisibilityChangedHandler = (adSlotElementId, inViewPercentag
     vsgObj[adSlotElementId].lastViewed = currentTime;
     setToLocalStorageCb('viewability-data', vsgObj);
   }
+};
+
+export const addViewabilityTargeting = (globalConfig, targetingSet, vsgLocalStorageObj, cb) => {
+  Object.keys(targetingSet).forEach(targetKey => {
+    if (
+      vsgLocalStorageObj[targetKey] &&
+      Object.keys(targetingSet[targetKey]).length !== 0 &&
+      vsgLocalStorageObj[targetKey].hasOwnProperty('viewed') &&
+      vsgLocalStorageObj[targetKey].hasOwnProperty('rendered')
+    ) {
+      const bvs = Math.round((vsgLocalStorageObj[targetKey].viewed / vsgLocalStorageObj[targetKey].rendered) * 10) / 10;
+      const bvb = bvs > 0.7 ? 'HIGH' : bvs < 0.5 ? 'LOW' : 'MEDIUM';
+      const targetingScoreKey = globalConfig[MODULE_NAME][TARGETING].scoreKey ? globalConfig[MODULE_NAME][TARGETING].scoreKey : 'bidViewabilityScore';
+      const targetingBucketKey = globalConfig[MODULE_NAME][TARGETING].bucketKey ? globalConfig[MODULE_NAME][TARGETING].bucketKey : 'bidViewabilityBucket';
+
+      targetingSet[targetKey][targetingScoreKey] = bvs;
+      targetingSet[targetKey][targetingBucketKey] = bvb;
+    }
+  });
+
+  cb(targetingSet);
+};
+
+export const setViewabilityTargetingKeys = globalConfig => {
+  events.on(CONSTANTS.EVENTS.AUCTION_END, () => {
+    if (vsgObj) {
+      const targetingSet = targeting.getAllTargeting();
+      addViewabilityTargeting(globalConfig, targetingSet, vsgObj, updateGptWithViewabilityTargeting);
+    }
+  });
+};
+
+export const updateGptWithViewabilityTargeting = targetingSet => {
+  window.googletag.pubads().getSlots().forEach(slot => {
+    Object.keys(targetingSet).filter(isAdUnitCodeMatchingSlot(slot)).forEach(targetId => {
+      slot.updateTargetingFromMap(targetingSet[targetId])
+    })
+  });
 }
 
-export let init = () => {
-  config.getConfig(MODULE_NAME, (vsgConfig) => {
-    if (vsgConfig[MODULE_NAME][ENABLED] !== true) {
+export const setGptEventHandlers = () => {
+  events.on(CONSTANTS.EVENTS.AUCTION_INIT, () => {
+    // add the GPT event listeners
+    window.googletag = window.googletag || {};
+    window.googletag.cmd = window.googletag.cmd || [];
+    window.googletag.cmd.push(() => {
+      window.googletag.pubads().addEventListener(GPT_SLOT_RENDER_ENDED_EVENT, function(event) {
+        const currentAdSlotElement = event.slot.getSlotElementId();
+        gptSlotRenderEndedHandler(currentAdSlotElement, setAndStringifyToLocalStorage);
+      });
+
+      window.googletag.pubads().addEventListener(GPT_IMPRESSION_VIEWABLE_EVENT, function(event) {
+        const currentAdSlotElement = event.slot.getSlotElementId();
+        gptImpressionViewableHandler(currentAdSlotElement, setAndStringifyToLocalStorage);
+      });
+
+      window.googletag.pubads().addEventListener(GPT_SLOT_VISIBILITY_CHANGED_EVENT, function(event) {
+        const currentAdSlotElement = event.slot.getSlotElementId();
+        gptSlotVisibilityChangedHandler(currentAdSlotElement, event.inViewPercentage, setAndStringifyToLocalStorage);
+      });
+    });
+  });
+};
+
+export let init = (setGptCb, setTargetingCb) => {
+  config.getConfig(MODULE_NAME, (globalConfig) => {
+    if (globalConfig[MODULE_NAME][ENABLED] !== true) {
       return;
     }
 
-    events.on(CONSTANTS.EVENTS.AUCTION_INIT, () => {
-      // add the GPT event listeners
-      window.googletag = window.googletag || {};
-      window.googletag.cmd = window.googletag.cmd || [];
-      window.googletag.cmd.push(() => {
-        window.googletag.pubads().addEventListener(GPT_SLOT_RENDER_ENDED_EVENT, function(event) {
-          const currentAdSlotElement = event.slot.getSlotElementId();
-          gptSlotRenderEndedHandler(currentAdSlotElement, setAndStringifyToLocalStorage);
-        });
+    setGptCb();
 
-        window.googletag.pubads().addEventListener(GPT_IMPRESSION_VIEWABLE_EVENT, function(event) {
-          const currentAdSlotElement = event.slot.getSlotElementId();
-          gptImpressionViewableHandler(currentAdSlotElement, setAndStringifyToLocalStorage);
-        });
-
-        window.googletag.pubads().addEventListener(GPT_SLOT_VISIBILITY_CHANGED_EVENT, function(event) {
-          const currentAdSlotElement = event.slot.getSlotElementId();
-          gptSlotVisibilityChangedHandler(currentAdSlotElement, event.inViewPercentage, setAndStringifyToLocalStorage);
-        });
-      });
-    });
-
-    if (vsgConfig.viewabilityScoreGeneration?.targeting?.enabled) {
-      events.on(CONSTANTS.EVENTS.AUCTION_END, () => {
-        let targetingSet = targeting.getAllTargeting();
-
-        if (localStorage.getItem('viewability-data')) {
-          Object.keys(targetingSet).forEach(targetKey => {
-            if (
-              vsgObj[targetKey] &&
-              Object.keys(targetingSet[targetKey]).length !== 0 &&
-              vsgObj[targetKey].hasOwnProperty('viewed') &&
-              vsgObj[targetKey].hasOwnProperty('rendered')
-            ) {
-              const bvs = Math.round((vsgObj[targetKey].viewed / vsgObj[targetKey].rendered) * 10) / 10;
-              const bvb = bvs > 0.7 ? 'HIGH' : bvs < 0.5 ? 'LOW' : 'MEDIUM';
-              const targetingScoreKey = vsgConfig[MODULE_NAME][TARGETING].scoreKey ? vsgConfig[MODULE_NAME][TARGETING].scoreKey : 'bidViewabilityScore';
-              const targetingBucketKey = vsgConfig[MODULE_NAME][TARGETING].bucketKey ? vsgConfig[MODULE_NAME][TARGETING].bucketKey : 'bidViewabilityBucket';
-
-              targetingSet[targetKey][targetingScoreKey] = bvs;
-              targetingSet[targetKey][targetingBucketKey] = bvb;
-            }
-          });
-        }
-
-        window.googletag.pubads().getSlots().forEach(slot => {
-          Object.keys(targetingSet).filter(isAdUnitCodeMatchingSlot(slot)).forEach(targetId => {
-            slot.updateTargetingFromMap(targetingSet[targetId])
-          })
-        });
-      });
+    if (globalConfig.viewabilityScoreGeneration?.targeting?.enabled) {
+      setTargetingCb(globalConfig);
     }
 
     adapterManager.makeBidRequests.after(makeBidRequestsHook);
   });
 }
 
-init();
+init(setGptEventHandlers, setViewabilityTargetingKeys);
