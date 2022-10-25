@@ -182,6 +182,8 @@ export const setGptEventHandlers = () => {
 };
 
 const initConfigDefaults = config => {
+  if (!config[MODULE_NAME][TARGETING]) { config[MODULE_NAME][TARGETING] = {} };
+
   config[MODULE_NAME][TARGETING].enabled =
     typeof config.viewabilityScoreGeneration?.targeting?.enabled === 'boolean'
       ? config.viewabilityScoreGeneration?.targeting?.enabled

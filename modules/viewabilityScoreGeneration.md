@@ -155,3 +155,6 @@ function  getBidViewabilityBucketsPerBidRequest (bidRequest, bidResponse) {
 - This module enables availability of viewability data on all Prebid JS bid requests to SSP's.  Further integration to do what you want with that data is required.
 - Doesn't seems to work with Instream Video, https://docs.prebid.org/dev-docs/examples/instream-banner-mix.html as GPT's impressionViewable event is not triggered for instream-video-creative
 - Works with Banner, Outsteam, Native creatives
+
+# Open Questions:
+- Should there be a limit to the amount of bucket categories that a publisher can configure?
