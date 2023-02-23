@@ -11,30 +11,7 @@ const TARGETING = 'targeting';
 const GPT_SLOT_RENDER_ENDED_EVENT = 'slotRenderEnded';
 const GPT_IMPRESSION_VIEWABLE_EVENT = 'impressionViewable';
 const GPT_SLOT_VISIBILITY_CHANGED_EVENT = 'slotVisibilityChanged';
-
-// USE event.size (RENDER) & event.slot.getSizes (VIEW & VISIBILITYCHANGE)
-// window.googletag = window.googletag || {};
-// window.googletag.cmd = window.googletag.cmd || [];
-// window.googletag.cmd.push(() => {
-//   // window.googletag.pubads().addEventListener('slotRenderEnded', function(event) {
-//   //   console.log({ event });
-//   //   console.log({ size: event.size });
-//   //   console.log({ slotElementId: event.slot.getSlotElementId() });
-//   //   console.log({ slotSizes: event.slot.getSizes() });
-//   // });
-//   // window.googletag.pubads().addEventListener('impressionViewable', function(event) {
-//   //   console.log({ event });
-//   //   console.log({ size: event.size });
-//   //   console.log({ slotElementId: event.slot.getSlotElementId() });
-//   //   console.log({ slotSizes: event.slot.getSizes() });
-//   // });
-//   window.googletag.pubads().addEventListener('slotVisibilityChanged', function(event) {
-//     console.log({ event });
-//     console.log({ size: event.size });
-//     console.log({ slotElementId: event.slot.getSlotElementId() });
-//     console.log({ slotSizes: event.slot.getSizes() });
-//   });
-// });
+// const TOTAL_VIEW_TIME_LIMIT = 1000000000000;
 
 export const getAndParseFromLocalStorage = key => JSON.parse(window.localStorage.getItem(key));
 export const setAndStringifyToLocalStorage = (key, object) => { window.localStorage.setItem(key, JSON.stringify(object)); };
@@ -60,15 +37,13 @@ export const makeBidRequestsHook = (fn, bidderRequests) => {
   fn(bidderRequests);
 }
 
-export const gptSlotRenderEndedHandler = (adSlotElementId, setToLocalStorageCb) => {
+const incrementRenderCount = key => {
   if (vsgObj) {
-    if (vsgObj[adSlotElementId]) {
-      if (vsgObj[adSlotElementId].lastViewed) delete vsgObj[adSlotElementId].lastViewed;
-
-      vsgObj[adSlotElementId].rendered = vsgObj[adSlotElementId].rendered + 1;
-      vsgObj[adSlotElementId].updatedAt = Date.now();
+    if (vsgObj[key]) {
+      vsgObj[key].rendered = vsgObj[key].rendered + 1;
+      vsgObj[key].updatedAt = Date.now();
     } else {
-      vsgObj[adSlotElementId] = {
+      vsgObj[key] = {
         rendered: 1,
         viewed: 0,
         createdAt: Date.now()
@@ -76,24 +51,22 @@ export const gptSlotRenderEndedHandler = (adSlotElementId, setToLocalStorageCb) 
     }
   } else {
     vsgObj = {
-      [adSlotElementId]: {
+      [key]: {
         rendered: 1,
         viewed: 0,
         createdAt: Date.now()
       }
     }
   }
-
-  setToLocalStorageCb('viewability-data', vsgObj);
 };
 
-export const gptImpressionViewableHandler = (adSlotElementId, setToLocalStorageCb) => {
+const incrementViewCount = key => {
   if (vsgObj) {
-    if (vsgObj[adSlotElementId]) {
-      vsgObj[adSlotElementId].viewed = vsgObj[adSlotElementId].viewed + 1;
-      vsgObj[adSlotElementId].updatedAt = Date.now();
+    if (vsgObj[key]) {
+      vsgObj[key].viewed = vsgObj[key].viewed + 1;
+      vsgObj[key].updatedAt = Date.now();
     } else {
-      vsgObj[adSlotElementId] = {
+      vsgObj[key] = {
         rendered: 0,
         viewed: 1,
         createdAt: Date.now()
@@ -101,35 +74,63 @@ export const gptImpressionViewableHandler = (adSlotElementId, setToLocalStorageC
     }
   } else {
     vsgObj = {
-      [adSlotElementId]: {
+      [key]: {
         rendered: 0,
         viewed: 1,
         createdAt: Date.now()
       }
     }
   }
-
-  setToLocalStorageCb('viewability-data', vsgObj);
 };
 
-export const gptSlotVisibilityChangedHandler = (adSlotElementId, inViewPercentage, setToLocalStorageCb) => {
+const incrementTotalViewTime = (key, inViewPercentage, setToLocalStorageCb) => {
   const currentTime = Date.now();
-  const lastViewStarted = vsgObj[adSlotElementId].lastViewStarted;
+  const lastViewStarted = vsgObj[key].lastViewStarted;
   let diff;
   if (inViewPercentage < 50) {
     if (lastViewStarted) {
       diff = currentTime - lastViewStarted;
-      vsgObj[adSlotElementId].totalViewTime = Math.round((vsgObj[adSlotElementId].totalViewTime || 0) + diff / 1000);
-      delete vsgObj[adSlotElementId].lastViewStarted;
+      vsgObj[key].totalViewTime = Math.round((vsgObj[key].totalViewTime || 0) + diff / 1000);
+      delete vsgObj[key].lastViewStarted;
     }
   } else {
     if (lastViewStarted) {
       diff = currentTime - lastViewStarted;
-      vsgObj[adSlotElementId].totalViewTime = Math.round((vsgObj[adSlotElementId].totalViewTime || 0) + diff / 1000);
+      vsgObj[key].totalViewTime = Math.round((vsgObj[key].totalViewTime || 0) + diff / 1000);
     }
-    vsgObj[adSlotElementId].lastViewStarted = currentTime;
-    vsgObj[adSlotElementId].lastViewed = parseInt(performance.now());
+    vsgObj[key].lastViewStarted = currentTime;
     setToLocalStorageCb('viewability-data', vsgObj);
+  }
+};
+
+export const gptSlotRenderEndedHandler = (adSlotElementId, adSlotSize, setToLocalStorageCb) => {
+  // eslint-disable-next-line no-console
+  console.log({ adSlotElementId, adSlotSize, setToLocalStorageCb });
+  incrementRenderCount(adSlotElementId);
+  incrementRenderCount(adSlotSize);
+  setToLocalStorageCb('viewability-data', vsgObj);
+};
+
+export const gptImpressionViewableHandler = (adSlotElementId, adSlotSizes, setToLocalStorageCb) => {
+  incrementViewCount(adSlotElementId);
+
+  if (adSlotSizes) {
+    adSlotSizes.forEach(adSlotSize => {
+      const adSlotKey = [adSlotSize.width, adSlotSize.height];
+      incrementViewCount(adSlotKey);
+    });
+  }
+  setToLocalStorageCb('viewability-data', vsgObj);
+};
+
+export const gptSlotVisibilityChangedHandler = (adSlotElementId, adSlotSizes, inViewPercentage, setToLocalStorageCb) => {
+  incrementTotalViewTime(adSlotElementId, inViewPercentage, setToLocalStorageCb);
+
+  if (adSlotSizes) {
+    adSlotSizes.forEach(adSlotSize => {
+      const adSlotKey = [adSlotSize.width, adSlotSize.height];
+      incrementTotalViewTime(adSlotKey, inViewPercentage, setToLocalStorageCb);
+    });
   }
 };
 
@@ -197,37 +198,30 @@ export const updateGptWithViewabilityTargeting = targetingSet => {
 }
 
 export const setGptEventHandlers = () => {
-  // events.on(CONSTANTS.EVENTS.AUCTION_INIT, () => {
-  // add the GPT event listeners
-  window.googletag = window.googletag || {};
-  window.googletag.cmd = window.googletag.cmd || [];
-  window.googletag.cmd.push(() => {
-    window.googletag.pubads().addEventListener(GPT_SLOT_RENDER_ENDED_EVENT, function(event) {
-      // eslint-disable-next-line no-console
-      console.log({ event });
-      // eslint-disable-next-line no-console
-      console.log({ size: event.size });
-      // eslint-disable-next-line no-console
-      console.log({ slotElementId: event.slot.getSlotElementId() });
-      // eslint-disable-next-line no-console
-      console.log({ slotSizes: event.slot.getSizes() });
-      const currentAdSlotElement = event.slot.getSlotElementId();
-      gptSlotRenderEndedHandler(currentAdSlotElement, setAndStringifyToLocalStorage);
-    });
+  events.on(CONSTANTS.EVENTS.AUCTION_INIT, () => {
+    // add the GPT event listeners
+    window.googletag = window.googletag || {};
+    window.googletag.cmd = window.googletag.cmd || [];
+    window.googletag.cmd.push(() => {
+      window.googletag.pubads().addEventListener(GPT_SLOT_RENDER_ENDED_EVENT, function(event) {
+        const currentAdSlotElement = event.slot.getSlotElementId();
+        const currentAdSlotSize = event.size;
+        gptSlotRenderEndedHandler(currentAdSlotElement, currentAdSlotSize, setAndStringifyToLocalStorage);
+      });
 
-    window.googletag.pubads().addEventListener(GPT_IMPRESSION_VIEWABLE_EVENT, function(event) {
-      // eslint-disable-next-line no-console
-      // console.log({ event });
-      const currentAdSlotElement = event.slot.getSlotElementId();
-      gptImpressionViewableHandler(currentAdSlotElement, setAndStringifyToLocalStorage);
-    });
+      window.googletag.pubads().addEventListener(GPT_IMPRESSION_VIEWABLE_EVENT, function(event) {
+        const currentAdSlotElement = event.slot.getSlotElementId();
+        const currentAdSlotSizes = event.slot.getSizes();
+        gptImpressionViewableHandler(currentAdSlotElement, currentAdSlotSizes, setAndStringifyToLocalStorage);
+      });
 
-    window.googletag.pubads().addEventListener(GPT_SLOT_VISIBILITY_CHANGED_EVENT, function(event) {
-      const currentAdSlotElement = event.slot.getSlotElementId();
-      gptSlotVisibilityChangedHandler(currentAdSlotElement, event.inViewPercentage, setAndStringifyToLocalStorage);
+      window.googletag.pubads().addEventListener(GPT_SLOT_VISIBILITY_CHANGED_EVENT, function(event) {
+        const currentAdSlotElement = event.slot.getSlotElementId();
+        const currentAdSlotSizes = event.slot.getSizes();
+        gptSlotVisibilityChangedHandler(currentAdSlotElement, currentAdSlotSizes, event.inViewPercentage, setAndStringifyToLocalStorage);
+      });
     });
   });
-  // });
 };
 
 const initConfigDefaults = config => {
