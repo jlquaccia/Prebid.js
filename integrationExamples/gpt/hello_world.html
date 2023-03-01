@@ -20,23 +20,35 @@
 
       var adUnits = [
         {
-          code: "div-gpt-ad-1460505748561-0",
+          code: "ad-element-id-1",
           mediaTypes: {
             banner: {
               sizes: [
                 [300, 250],
-                [300, 600],
+                [300, 600]
               ],
             },
           },
           // Replace this object to test a new Adapter!
           bids: [
             {
-              bidder: "appnexus",
+              bidder: "pubmatic",
               params: {
-                placementId: 13144370,
+                publisherId: "156276",
+                // adSlot: "pubmatic_test",
+                adSlot: "test",
               },
             },
+          ],
+        },
+        {
+          code: "ad-element-id-2",
+          mediaTypes: {
+            banner: {
+              sizes: [[728, 90]],
+            },
+          },
+          bids: [
             {
               bidder: "pubmatic",
               params: {
@@ -109,9 +121,19 @@
             "/19968336/header-bid-tag-0",
             [
               [300, 250],
-              [300, 600],
+              [300, 600]
             ],
-            "div-gpt-ad-1460505748561-0"
+            "ad-element-id-1"
+          )
+          .addService(googletag.pubads());
+
+        googletag
+          .defineSlot(
+            "/19968336/header-bid-tag-1",
+            [
+              [728, 90]
+            ],
+            "ad-element-id-2"
           )
           .addService(googletag.pubads());
 
@@ -124,10 +146,17 @@
   <body>
     <h2>Prebid.js Test</h2>
     <h5>Div-1</h5>
-    <div id="div-gpt-ad-1460505748561-0">
+    <div id="ad-element-id-1">
       <script type="text/javascript">
         googletag.cmd.push(function () {
-          googletag.display("div-gpt-ad-1460505748561-0");
+          googletag.display("ad-element-id-1");
+        });
+      </script>
+    </div>
+    <div id="ad-element-id-2">
+      <script type="text/javascript">
+        googletag.cmd.push(function () {
+          googletag.display("ad-element-id-2");
         });
       </script>
     </div>

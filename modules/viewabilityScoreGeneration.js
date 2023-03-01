@@ -11,127 +11,186 @@ const TARGETING = 'targeting';
 const GPT_SLOT_RENDER_ENDED_EVENT = 'slotRenderEnded';
 const GPT_IMPRESSION_VIEWABLE_EVENT = 'impressionViewable';
 const GPT_SLOT_VISIBILITY_CHANGED_EVENT = 'slotVisibilityChanged';
-// const TOTAL_VIEW_TIME_LIMIT = 1000000000000;
+const TOTAL_VIEW_TIME_LIMIT = 200;
+const domain = window.location.hostname;
 
 export const getAndParseFromLocalStorage = key => JSON.parse(window.localStorage.getItem(key));
 export const setAndStringifyToLocalStorage = (key, object) => { window.localStorage.setItem(key, JSON.stringify(object)); };
 
 let vsgObj = getAndParseFromLocalStorage('viewability-data');
 
-export const makeBidRequestsHook = (fn, bidderRequests) => {
+export const makeBidRequestsHook = (fn, bidderRequests, adDomain = domain) => {
   if (vsgObj) {
     bidderRequests.forEach(bidderRequest => {
       bidderRequest.bids.forEach(bid => {
-        const bidViewabilityFields = { ...vsgObj[bid.adUnitCode] };
-        // Deleteing this field as it is only required to calculate totalViewtime and no need to send it to translator.
-        delete bidViewabilityFields.lastViewStarted;
-        // Deleteing totalTimeView incase value is less than 1 sec.
-        if (bidViewabilityFields.totalViewTime == 0) {
-          delete bidViewabilityFields.totalViewTime;
+        const bidViewabilityFields = {};
+        const adSizes = {};
+        const adUnit = vsgObj[bid.adUnitCode];
+        const addomain = vsgObj[adDomain];
+
+        if (bid.sizes.length) {
+          bid.sizes.forEach(bidSize => {
+            const key = bidSize.toString().replace(',', 'x');
+
+            if (vsgObj[key]) {
+              removeUnwantedKeys(vsgObj[key]);
+              adSizes[key] = vsgObj[key];
+            }
+          });
         }
-        if (vsgObj[bid.adUnitCode]) bid.bidViewability = bidViewabilityFields;
+
+        if (Object.keys(adSizes).length) bidViewabilityFields.adSizes = adSizes;
+
+        if (adUnit) {
+          removeUnwantedKeys(adUnit);
+          bidViewabilityFields.adUnit = adUnit;
+        }
+
+        if (addomain) {
+          removeUnwantedKeys(addomain);
+          bidViewabilityFields.adDomain = addomain;
+        }
+
+        if (Object.keys(bidViewabilityFields).length) bid.bidViewability = bidViewabilityFields;
       });
     });
   }
 
   fn(bidderRequests);
-}
+};
 
-const incrementRenderCount = key => {
-  if (vsgObj) {
-    if (vsgObj[key]) {
-      vsgObj[key].rendered = vsgObj[key].rendered + 1;
-      vsgObj[key].updatedAt = Date.now();
-    } else {
-      vsgObj[key] = {
-        rendered: 1,
-        viewed: 0,
-        createdAt: Date.now()
-      }
-    }
-  } else {
-    vsgObj = {
-      [key]: {
-        rendered: 1,
-        viewed: 0,
-        createdAt: Date.now()
-      }
-    }
+const removeUnwantedKeys = obj => {
+  // Deleteing this field as it is only required to calculate totalViewtime and no need to send it to translator.
+  delete obj.lastViewStarted;
+  // Deleteing totalTimeView incase value is less than 1 sec.
+  if (obj.totalViewTime == 0) {
+    delete obj.totalViewTime;
   }
 };
 
-const incrementViewCount = key => {
-  if (vsgObj) {
+// once the TOTAL_VIEW_TIME_LIMIT for totalViewTime is reached, divide totalViewTime, rendered & viewed all by the same factor of "x" in order to preserve the same averages but not let counts in localstorage get too high
+const reduceAndPreserveCounts = (key, lsObj = vsgObj) => {
+  const divideBy = 2;
+  lsObj[key].totalViewTime = Math.round(lsObj[key].totalViewTime / divideBy);
+  lsObj[key].rendered = Math.round(lsObj[key].rendered / divideBy);
+  lsObj[key].viewed = Math.round(lsObj[key].viewed / divideBy);
+};
+
+export const updateTotalViewTime = (diff, currentTime, lastViewStarted, key, lsObj = vsgObj) => {
+  diff = currentTime - lastViewStarted;
+  const newValue = Math.round((lsObj[key].totalViewTime || 0) + diff / 1000);
+
+  if (newValue >= TOTAL_VIEW_TIME_LIMIT) {
+    reduceAndPreserveCounts(key, lsObj);
+  } else {
+    lsObj[key].totalViewTime = newValue;
+  }
+};
+
+const incrementRenderCount = keyArr => {
+  keyArr.forEach(key => {
+    if (vsgObj) {
+      if (vsgObj[key]) {
+        vsgObj[key].rendered = vsgObj[key].rendered + 1;
+        vsgObj[key].updatedAt = Date.now();
+      } else {
+        vsgObj[key] = {
+          rendered: 1,
+          viewed: 0,
+          createdAt: Date.now()
+        }
+      }
+    } else {
+      vsgObj = {
+        [key]: {
+          rendered: 1,
+          viewed: 0,
+          createdAt: Date.now()
+        }
+      }
+    }
+  });
+};
+
+const incrementViewCount = keyArr => {
+  keyArr.forEach(key => {
     if (vsgObj[key]) {
       vsgObj[key].viewed = vsgObj[key].viewed + 1;
       vsgObj[key].updatedAt = Date.now();
-    } else {
-      vsgObj[key] = {
-        rendered: 0,
-        viewed: 1,
-        createdAt: Date.now()
-      }
     }
-  } else {
-    vsgObj = {
-      [key]: {
-        rendered: 0,
-        viewed: 1,
-        createdAt: Date.now()
-      }
-    }
-  }
+    // if (vsgObj) {
+    //   if (vsgObj[key]) {
+    //     vsgObj[key].viewed = vsgObj[key].viewed + 1;
+    //     vsgObj[key].updatedAt = Date.now();
+    //   } else {
+    //     vsgObj[key] = {
+    //       rendered: 0,
+    //       viewed: 1,
+    //       createdAt: Date.now()
+    //     }
+    //   }
+    // } else {
+    //   vsgObj = {
+    //     [key]: {
+    //       rendered: 0,
+    //       viewed: 1,
+    //       createdAt: Date.now()
+    //     }
+    //   }
+    // }
+  });
 };
 
-const incrementTotalViewTime = (key, inViewPercentage, setToLocalStorageCb) => {
-  const currentTime = Date.now();
-  const lastViewStarted = vsgObj[key].lastViewStarted;
-  let diff;
-  if (inViewPercentage < 50) {
-    if (lastViewStarted) {
-      diff = currentTime - lastViewStarted;
-      vsgObj[key].totalViewTime = Math.round((vsgObj[key].totalViewTime || 0) + diff / 1000);
-      delete vsgObj[key].lastViewStarted;
+const incrementTotalViewTime = (keyArr, inViewPercentage, setToLocalStorageCb) => {
+  keyArr.forEach(key => {
+    if (vsgObj[key]) {
+      const currentTime = Date.now();
+      const lastViewStarted = vsgObj[key].lastViewStarted;
+      let diff;
+      if (inViewPercentage < 50) {
+        if (lastViewStarted) {
+          updateTotalViewTime(diff, currentTime, lastViewStarted, key);
+          delete vsgObj[key].lastViewStarted;
+        }
+      } else {
+        if (lastViewStarted) {
+          updateTotalViewTime(diff, currentTime, lastViewStarted, key);
+        }
+        vsgObj[key].lastViewStarted = currentTime;
+        vsgObj[key].updatedAt = Date.now();
+        setToLocalStorageCb('viewability-data', vsgObj);
+      }
     }
-  } else {
-    if (lastViewStarted) {
-      diff = currentTime - lastViewStarted;
-      vsgObj[key].totalViewTime = Math.round((vsgObj[key].totalViewTime || 0) + diff / 1000);
-    }
-    vsgObj[key].lastViewStarted = currentTime;
-    setToLocalStorageCb('viewability-data', vsgObj);
-  }
+  });
 };
 
-export const gptSlotRenderEndedHandler = (adSlotElementId, adSlotSize, setToLocalStorageCb) => {
-  // eslint-disable-next-line no-console
-  console.log({ adSlotElementId, adSlotSize, setToLocalStorageCb });
-  incrementRenderCount(adSlotElementId);
-  incrementRenderCount(adSlotSize);
+export const gptSlotRenderEndedHandler = (adSlotElementId, adSlotSize, adDomain, setToLocalStorageCb) => {
+  incrementRenderCount([adDomain, adSlotElementId, adSlotSize]);
   setToLocalStorageCb('viewability-data', vsgObj);
 };
 
-export const gptImpressionViewableHandler = (adSlotElementId, adSlotSizes, setToLocalStorageCb) => {
-  incrementViewCount(adSlotElementId);
-
+export const gptImpressionViewableHandler = (adSlotElementId, adSlotSizes, adDomain, setToLocalStorageCb) => {
+  const keyArr = [adDomain, adSlotElementId];
   if (adSlotSizes) {
     adSlotSizes.forEach(adSlotSize => {
-      const adSlotKey = [adSlotSize.width, adSlotSize.height];
-      incrementViewCount(adSlotKey);
+      const adSlotKey = `${adSlotSize.width}x${adSlotSize.height}`;
+      keyArr.push(adSlotKey);
     });
   }
+  incrementViewCount(keyArr);
   setToLocalStorageCb('viewability-data', vsgObj);
 };
 
-export const gptSlotVisibilityChangedHandler = (adSlotElementId, adSlotSizes, inViewPercentage, setToLocalStorageCb) => {
-  incrementTotalViewTime(adSlotElementId, inViewPercentage, setToLocalStorageCb);
+export const gptSlotVisibilityChangedHandler = (adSlotElementId, adSlotSizes, adDomain, inViewPercentage, setToLocalStorageCb) => {
+  const keyArr = [adDomain, adSlotElementId];
 
   if (adSlotSizes) {
     adSlotSizes.forEach(adSlotSize => {
-      const adSlotKey = [adSlotSize.width, adSlotSize.height];
-      incrementTotalViewTime(adSlotKey, inViewPercentage, setToLocalStorageCb);
+      const adSlotKey = `${adSlotSize.width}x${adSlotSize.height}`;
+      keyArr.push(adSlotKey);
     });
   }
+  incrementTotalViewTime(keyArr, inViewPercentage, setToLocalStorageCb);
 };
 
 export const calculateBucket = (bucketCategories, score) => {
@@ -205,20 +264,20 @@ export const setGptEventHandlers = () => {
     window.googletag.cmd.push(() => {
       window.googletag.pubads().addEventListener(GPT_SLOT_RENDER_ENDED_EVENT, function(event) {
         const currentAdSlotElement = event.slot.getSlotElementId();
-        const currentAdSlotSize = event.size;
-        gptSlotRenderEndedHandler(currentAdSlotElement, currentAdSlotSize, setAndStringifyToLocalStorage);
+        const currentAdSlotSize = event.size.toString().replace(',', 'x');
+        gptSlotRenderEndedHandler(currentAdSlotElement, currentAdSlotSize, domain, setAndStringifyToLocalStorage);
       });
 
       window.googletag.pubads().addEventListener(GPT_IMPRESSION_VIEWABLE_EVENT, function(event) {
         const currentAdSlotElement = event.slot.getSlotElementId();
         const currentAdSlotSizes = event.slot.getSizes();
-        gptImpressionViewableHandler(currentAdSlotElement, currentAdSlotSizes, setAndStringifyToLocalStorage);
+        gptImpressionViewableHandler(currentAdSlotElement, currentAdSlotSizes, domain, setAndStringifyToLocalStorage);
       });
 
       window.googletag.pubads().addEventListener(GPT_SLOT_VISIBILITY_CHANGED_EVENT, function(event) {
         const currentAdSlotElement = event.slot.getSlotElementId();
         const currentAdSlotSizes = event.slot.getSizes();
-        gptSlotVisibilityChangedHandler(currentAdSlotElement, currentAdSlotSizes, event.inViewPercentage, setAndStringifyToLocalStorage);
+        gptSlotVisibilityChangedHandler(currentAdSlotElement, currentAdSlotSizes, domain, event.inViewPercentage, setAndStringifyToLocalStorage);
       });
     });
   });
