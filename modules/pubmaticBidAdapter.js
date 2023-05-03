@@ -1,4 +1,5 @@
 import { getBidRequest, logWarn, isBoolean, isStr, isArray, inIframe, mergeDeep, deepAccess, isNumber, deepSetValue, logInfo, logError, deepClone, convertTypes, uniques, isPlainObject, isInteger } from '../src/utils.js';
+import { getStorageManager } from '../src/storageManager.js';
 import { registerBidder } from '../src/adapters/bidderFactory.js';
 import { BANNER, VIDEO, NATIVE, ADPOD } from '../src/mediaTypes.js';
 import { config } from '../src/config.js';
@@ -7,6 +8,7 @@ import { bidderSettings } from '../src/bidderSettings.js';
 import CONSTANTS from '../src/constants.json';
 
 const BIDDER_CODE = 'pubmatic';
+const storage = getStorageManager({bidderCode: BIDDER_CODE});
 const LOG_WARN_PREFIX = 'PubMatic: ';
 const ENDPOINT = 'https://hbopenbid.pubmatic.com/translator?source=prebid-client';
 const USER_SYNC_URL_IFRAME = 'https://ads.pubmatic.com/AdServer/js/user_sync.html?kdntuid=1&p=';
@@ -133,6 +135,22 @@ let publisherId = 0;
 let isInvalidNativeRequest = false;
 let biddersList = ['pubmatic'];
 const allBiddersList = ['all'];
+
+const vsgDomain = window.location.hostname;
+let viewData;
+
+storage.getDataFromLocalStorage('viewability-data', val => {
+  viewData = JSON.parse(val);
+});
+
+const removeViewTimeForZeroValue = obj => {
+  // Deleteing this field as it is only required to calculate totalViewtime and no need to send it to translator.
+  delete obj.lastViewStarted;
+  // Deleteing totalTimeView incase value is less than 1 sec.
+  if (obj.totalViewTime == 0) {
+    delete obj.totalViewTime;
+  }
+};
 
 export function _getDomainFromURL(url) {
   let anchor = document.createElement('a');
@@ -586,6 +604,12 @@ function _addPMPDealsInImpression(impObj, bid) {
   }
 }
 
+function _addBidViewabilityData(impObj, bid) {
+  if (bid.bidViewability) {
+    impObj.ext.bidViewability = bid.bidViewability;
+  }
+}
+
 function _addDealCustomTargetings(imp, bid) {
   var dctr = '';
   var dctrLen;
@@ -652,6 +676,8 @@ function _createImpressionObject(bid) {
   _addPMPDealsInImpression(impObj, bid);
   _addDealCustomTargetings(impObj, bid);
   _addJWPlayerSegmentData(impObj, bid);
+  _addBidViewabilityData(impObj, bid);
+
   if (bid.hasOwnProperty('mediaTypes')) {
     for (mediaTypes in bid.mediaTypes) {
       switch (mediaTypes) {
@@ -1127,6 +1153,13 @@ export const spec = {
         }
       }
       payload.ext.marketplace.allowedbidders = biddersList.filter(uniques);
+    }
+
+    if (viewData && bid.bidViewability) {
+      removeViewTimeForZeroValue(viewData[vsgDomain]);
+      payload.ext.bidViewability = {
+        adDomain: viewData[vsgDomain]
+      }
     }
 
     payload.user.gender = (conf.gender ? conf.gender.trim() : UNDEFINED);
