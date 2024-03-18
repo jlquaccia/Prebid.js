@@ -1,4 +1,5 @@
 <html>
+
 <head>
   <!--
     FLEDGE (Protected Audience API) configuration with GPT and FLEDGE-supporting adapter
@@ -17,24 +18,27 @@
     var googletag = googletag || {};
     googletag.cmd = googletag.cmd || [];
 
-    googletag.cmd.push(function() {
+    googletag.cmd.push(function () {
       googletag.pubads().disableInitialLoad();
     });
 
     var adUnits = [{
-      code: 'div-gpt-ad-1460505748561-0',
+      code: 'Div2',
       mediaTypes: {
-        banner: {
-          sizes: [[300, 250]]
-        }
+        banner: { sizes: [300, 250] }
       },
-      bids: [{
-        bidder: 'openx',
-        params: {
-          platform: '8869ec2c-9d3f-4f16-9d2f-49aaab8978fb',
-          unit: '111111'
+      bids: [
+        {
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '164074',
+            adSlot: '      /43743431/owfledge   ',
+            pmzoneid: 'zone2',
+            kadpageurl: 'http://www.microsoft.com/key1=1&key2=2&fledge_type=1',
+            // deals: ["PM-GNOD-0698"]
+          }
         }
-      }],
+      ],
       ortb2Imp: {
         ext: {
           ae: 1
@@ -42,13 +46,21 @@
       }
     }];
 
-    pbjs.que.push(function() {
+    pbjs.que.push(function () {
       pbjs.setConfig({
         paapi: {
           enabled: true,
           gpt: {
-              autoconfig: false
+            autoconfig: false
           }
+        },
+        debug: true
+      });
+
+      pbjs.setBidderConfig({
+        bidders: ['pubmatic'],
+        config: {
+          fledgeEnabled: true
         }
       });
 
@@ -62,8 +74,8 @@
       function sendAdserverRequest() {
         if (pbjs.adserverRequestSent) return;
         pbjs.adserverRequestSent = true;
-        googletag.cmd.push(function() {
-          pbjs.que.push(function() {
+        googletag.cmd.push(function () {
+          pbjs.que.push(function () {
             pbjs.setTargetingForGPTAsync();
             pbjs.setPAAPIConfigForGPT();
             googletag.pubads().refresh();
@@ -71,15 +83,16 @@
         });
       }
 
-      setTimeout(function() {
+      setTimeout(function () {
         sendAdserverRequest();
       }, FAILSAFE_TIMEOUT);
     });
 
-    googletag.cmd.push(function() {
-      googletag
-        .defineSlot('/19968336/header-bid-tag-0', adUnits[0].mediaTypes.banner.sizes, 'div-gpt-ad-1460505748561-0')
-        .addService(googletag.pubads());
+    googletag.cmd.push(function () {
+      // googletag
+      //   .defineSlot('/19968336/header-bid-tag-0', adUnits[0].mediaTypes.banner.sizes, 'div-gpt-ad-1460505748561-0')
+      //   .addService(googletag.pubads());
+      googletag.defineSlot('/43743431/owfledge', [300, 250], 'Div2').addService(googletag.pubads());
 
       googletag.pubads().enableSingleRequest();
       googletag.enableServices();
@@ -88,13 +101,21 @@
 </head>
 
 <body>
-    <h2>Prebid.js FLEDGE+GPT Example</h2>
+  <h2>Prebid.js FLEDGE+GPT Example</h2>
 
-    <h5>Div-1</h5>
-    <div id='div-gpt-ad-1460505748561-0'>
+  <!-- <h5>Div-1</h5>
+  <div id='div-gpt-ad-1460505748561-0'>
     <script type='text/javascript'>
-        googletag.cmd.push(function() { googletag.display('div-gpt-ad-1460505748561-0'); });
+      googletag.cmd.push(function () { googletag.display('div-gpt-ad-1460505748561-0'); });
     </script>
-    </div>
+  </div> -->
+  <div id='Div2'>
+    <script type='text/javascript'>
+      googletag.cmd.push(function () {
+        googletag.display('Div2');
+      });
+    </script>
+  </div>
 </body>
+
 </html>

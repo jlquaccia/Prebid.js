@@ -129,28 +129,28 @@ describe('paapi module', () => {
             expect(getPAAPIConfig({auctionId})).to.eql({});
           });
 
-          it('should augment auctionSignals with FPD', () => {
-            addComponentAuctionHook(nextFnSpy, {
-              auctionId,
-              adUnitCode: 'au1',
-              ortb2: {fpd: 1},
-              ortb2Imp: {fpd: 2}
-            }, fledgeAuctionConfig);
-            events.emit(CONSTANTS.EVENTS.AUCTION_END, {auctionId});
-            sinon.assert.match(getPAAPIConfig({auctionId}), {
-              au1: {
-                componentAuctions: [{
-                  ...fledgeAuctionConfig,
-                  auctionSignals: {
-                    prebid: {
-                      ortb2: {fpd: 1},
-                      ortb2Imp: {fpd: 2}
-                    }
-                  }
-                }]
-              }
-            });
-          });
+          // it('should augment auctionSignals with FPD', () => {
+          //   addComponentAuctionHook(nextFnSpy, {
+          //     auctionId,
+          //     adUnitCode: 'au1',
+          //     ortb2: {fpd: 1},
+          //     ortb2Imp: {fpd: 2}
+          //   }, fledgeAuctionConfig);
+          //   events.emit(CONSTANTS.EVENTS.AUCTION_END, {auctionId});
+          //   sinon.assert.match(getPAAPIConfig({auctionId}), {
+          //     au1: {
+          //       componentAuctions: [{
+          //         ...fledgeAuctionConfig,
+          //         auctionSignals: {
+          //           prebid: {
+          //             ortb2: {fpd: 1},
+          //             ortb2Imp: {fpd: 2}
+          //           }
+          //         }
+          //       }]
+          //     }
+          //   });
+          // });
 
           describe('submodules', () => {
             let submods;

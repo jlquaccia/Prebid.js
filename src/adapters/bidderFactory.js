@@ -290,6 +290,8 @@ export function newBidder(spec) {
       processBidderRequests(spec, validBidRequests.map(tidGuard.bidRequest), tidGuard.bidderRequest(bidderRequest), ajax, configEnabledCallback, {
         onRequest: requestObject => events.emit(CONSTANTS.EVENTS.BEFORE_BIDDER_HTTP, bidderRequest, requestObject),
         onResponse: (resp) => {
+          // eslint-disable-next-line no-console
+          console.log('onResponse', resp);
           onTimelyResponse(spec.code);
           responses.push(resp)
         },

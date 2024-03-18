@@ -120,10 +120,14 @@ export function addComponentAuctionHook(next, request, componentAuctionConfig) {
   if (getFledgeConfig().enabled) {
     const {adUnitCode, auctionId, ortb2, ortb2Imp} = request;
     const configs = pendingForAuction(auctionId);
+    // eslint-disable-next-line no-console
+    console.log({ next, request, componentAuctionConfig, adUnitCode, auctionId, ortb2, ortb2Imp, configs });
     if (configs != null) {
-      setFPDSignals(componentAuctionConfig, {ortb2, ortb2Imp});
+      setFPDSignals(componentAuctionConfig, {ortb2, ortb2Imp, requestId: request.bidId});
       !configs.hasOwnProperty(adUnitCode) && (configs[adUnitCode] = []);
       configs[adUnitCode].push(componentAuctionConfig);
+      request.componentAuctionConfig = componentAuctionConfig;
+      // request.ortb2Imp.ext.componentAuctionConfig = componentAuctionConfig;
     } else {
       logWarn(MODULE, `Received component auction config for auction that has closed (auction '${auctionId}', adUnit '${adUnitCode}')`, componentAuctionConfig);
     }
@@ -160,6 +164,8 @@ export function getPAAPIConfig({auctionId, adUnitCode} = {}, includeBlanks = fal
       }
     }
   })
+  // eslint-disable-next-line no-console
+  console.log({ auctionId, adUnitCode, includeBlanks, output, targetedAuctionConfigs });
   return output;
 }
 
