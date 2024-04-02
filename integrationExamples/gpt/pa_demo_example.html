@@ -1,0 +1,337 @@
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
+  <link rel="stylesheet" href="./css/main.css">
+  <script>
+    const ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 7;
+
+    // // Shoes interest group for criteo DSP
+    // const joinInterestGroup1 = async (dspUrl) => {
+    //   const interestGroup = {
+    //     owner: `${dspUrl}`,
+    //     name: 'shoes',
+    //     biddingLogicUrl: `${dspUrl}/openwrap/TestPages/jason/bid_folder/bid.js`,
+    //     ads: [
+    //       {
+    //         renderUrl: `${dspUrl}/openwrap/TestPages/jason/ads/shoes.html`,
+    //         metadata: {
+    //           adName: 'default-ad',
+    //         },
+    //       },
+    //     ],
+    //   };
+    //   navigator.joinAdInterestGroup(interestGroup, ONE_WEEK_IN_SECONDS);
+    // };
+    // joinInterestGroup1('https://owsdk-stagingams.pubmatic.com:8443');
+
+    // // Laptops interest group for criteo DSP
+    // const joinInterestGroup2 = async (dspUrl) => {
+    //   const interestGroup = {
+    //     owner: `${dspUrl}`,
+    //     name: 'laptops',
+    //     biddingLogicUrl: `${dspUrl}/openwrap/TestPages/jason/bid_folder/bid_adm_laptops.js`,
+    //     ads: [
+    //       {
+    //         renderUrl: `${dspUrl}/openwrap/TestPages/jason/ads/DomainRegisteredUncategorizedLaptops.html`,
+    //         metadata: {
+    //           adName: 'default-ad',
+    //         },
+    //       },
+    //     ],
+    //   };
+    //   navigator.joinAdInterestGroup(interestGroup, ONE_WEEK_IN_SECONDS);
+    // };
+    // joinInterestGroup2('https://owsdk-stagingams.pubmatic.com:8443');
+
+    // // Medicines interest group
+    // const joinInterestGroup4 = async (dspUrl) => {
+    //   const interestGroup = {
+    //     owner: `${dspUrl}`,
+    //     name: 'medicines',
+    //     biddingLogicUrl: `${dspUrl}/openwrap/TestPages/jason/bid_folder/bid_adm_med.js`,
+    //     ads: [
+    //       {
+    //         renderUrl: `${dspUrl}/openwrap/TestPages/jason/ads/domainBlockUrl.html`,
+    //         metadata: {
+    //           adName: 'default-ad',
+    //         },
+    //       },
+    //     ],
+    //   };
+    //   navigator.joinAdInterestGroup(interestGroup, ONE_WEEK_IN_SECONDS);
+    // };
+    // joinInterestGroup4('https://owsdk-stagingams.pubmatic.com:8443');
+
+    // // Mobiles interest group
+    // const joinInterestGroup6 = async (dspUrl) => {
+    //   const interestGroup = {
+    //     owner: `${dspUrl}`,
+    //     name: 'mobiles',
+    //     biddingLogicUrl: `${dspUrl}/openwrap/TestPages/jason/bid_folder/bid_adm_mob.js`,
+    //     ads: [
+    //       {
+    //         renderUrl: `${dspUrl}/openwrap/TestPages/jason/ads/OnlyPrimaryCatBlockSubCatNotBlockedMob.html`,
+    //         metadata: {
+    //           adName: 'default-ad',
+    //         },
+    //       },
+    //     ],
+    //   };
+    //   navigator.joinAdInterestGroup(interestGroup, ONE_WEEK_IN_SECONDS);
+    // };
+    // joinInterestGroup6('https://owsdk-stagingams.pubmatic.com:8443');
+  </script>
+  <script>
+    var PREBID_TIMEOUT = 5000;
+    var adUnits = [
+      {
+        code: 'Div1',
+        mediaTypes: {
+          banner: { sizes: [300, 250] }
+        },
+        bids: [
+          {
+            bidder: 'pubmatic',
+            params: {
+              publisherId: '164074',
+              adSlot: '/43743431/owfledge',
+              pmzoneid: 'zone2',
+              kadpageurl: 'http://www.microsoft.com/key1=1&key2=2&fledge_type=1'
+            }
+          },
+          {
+            bidder: 'rubicon',
+            params: {
+              accountId: 7780,                     // replace account/site/zone params
+              siteId: 87184,
+              zoneId: 413290,
+              inventory: {
+                prodtype: ["tech", "mobile"]
+              },
+              visitor: {
+                ucat: ["new"]
+              }
+            }
+          },
+          {
+            bidder: 'openx',
+            params: {
+              unit: '539439964',
+              delDomain: 'se-demo-d.openx.net',
+              customParams: {
+                key1: 'v1',
+                key2: ['v2', 'v3']
+              },
+            }
+          }
+        ],
+        ortb2Imp: {
+          ext: {
+            ae: 1
+          }
+        }
+      },
+      {
+        code: 'Div2',
+        mediaTypes: {
+          banner: { sizes: [300, 250] }
+        },
+        bids: [
+          {
+            bidder: 'pubmatic',
+            params: {
+              publisherId: '164074',
+              adSlot: '/43743431/owfledge',
+              pmzoneid: 'zone2',
+              kadpageurl: 'http://www.microsoft.com/key1=1&key2=2&fledge_type=1'
+            }
+          },
+          {
+            bidder: '33across',
+            params: {
+              siteId: 'examplePub123',    // required 
+              productId: 'siab|inview'    // required
+            }
+          },
+          {
+            bidder: 'criteo',
+            params: {
+              zoneId: 1455580
+            }
+          }
+        ],
+        ortb2Imp: {
+          ext: {
+            ae: 1
+          }
+        }
+      },
+      {
+        code: 'Div3',
+        mediaTypes: {
+          banner: { sizes: [300, 250] }
+        },
+        bids: [
+          {
+            bidder: 'pubmatic',
+            params: {
+              publisherId: '164074',
+              adSlot: '/43743431/owfledge',
+              pmzoneid: 'zone2',
+              kadpageurl: 'http://www.microsoft.com/key1=1&key2=2&fledge_type=1'
+            }
+          },
+          {
+            bidder: 'gumgum',
+            params: {
+              zone: 'zone_id' // provided by GumGum
+            }
+          },
+          {
+            bidder: 'ix',
+            params: {
+              siteId: '9999990'
+            }
+          }
+        ],
+        ortb2Imp: {
+          ext: {
+            ae: 1
+          }
+        }
+      }
+    ];
+
+    var pbjs = pbjs || {};
+    pbjs.que = pbjs.que || [];
+  </script>
+  <!-- <script type="text/javascript" src="prebid-v8.39.0-pre.js" async></script> -->
+  <script async src="../../build/dev/prebid.js"></script>
+  <script>
+    var googletag = googletag || {};
+    googletag.cmd = googletag.cmd || [];
+    googletag.cmd.push(function () {
+      googletag.pubads().disableInitialLoad();
+    });
+
+    pbjs.que.push(function () {
+      pbjs.setConfig({
+        firstPartyData: {
+          uaHints: ['architecture', 'laptop', 'browsers', 'mobile', 'model', 'source']
+        },
+        debug: true,
+        ortb2: {
+          site: {
+            keywords: "c:23041_p:50_protocol:2_adt:13_domain:abc.com_ae:1_case:IGbidDSP11,c:22987_p:60_protocol:2_adt:13_domain:abc.com_ae:1_case:IGbidDSP12"
+          }
+        },
+        userSync: {
+          filterSettings: { iframe: { bidders: '*', filter: 'include' } },
+          enabledBidders: ['pubmatic'],
+          syncDelay: 5000,
+        },
+        paapi: {
+          enabled: true,
+          gpt: {
+            autoconfig: false
+          }
+        }
+      });
+
+      pbjs.setBidderConfig({
+        bidders: ['pubmatic'],
+        config: {
+          fledgeEnabled: true
+        }
+      });
+
+      pbjs.addAdUnits(adUnits);
+
+      pbjs.requestBids({
+        bidsBackHandler: sendAdserverRequest
+      });
+    });
+
+    function sendAdserverRequest() {
+      if (pbjs.adserverRequestSent) return;
+      pbjs.adserverRequestSent = true;
+      googletag.cmd.push(function () {
+        pbjs.que.push(function () {
+          pbjs.setTargetingForGPTAsync();
+          pbjs.setPAAPIConfigForGPT();
+          googletag.pubads().refresh();
+        });
+      });
+    }
+
+    setTimeout(function () {
+      sendAdserverRequest();
+    }, PREBID_TIMEOUT);
+  </script>
+  <script>
+    (function () {
+      var gads = document.createElement('script');
+      gads.async = true;
+      gads.type = 'text/javascript';
+      var useSSL = 'https:' == document.location.protocol;
+      gads.src = (useSSL ? 'https:' : 'http:') +
+        '//www.googletagservices.com/tag/js/gpt.js';
+      var node = document.getElementsByTagName('script')[0];
+      node.parentNode.insertBefore(gads, node);
+    })();
+  </script>
+  <script>
+    googletag.cmd.push(function () {
+      googletag.defineSlot('/43743431/owfledge', [300, 250], 'Div1').addService(googletag.pubads());
+      googletag.defineSlot('/43743431/owfledge', [300, 250], 'Div2').addService(googletag.pubads());
+      googletag.defineSlot('/43743431/owfledge', [300, 250], 'Div3').addService(googletag.pubads());
+      googletag.pubads().enableSingleRequest();
+      googletag.enableServices();
+    });
+  </script>
+</head>
+
+<body>
+  <div class="content-wrapper">
+    <h2 class="title">Protected Audience + Prebid.js Demo</h2>
+    <div class="adslots-container">
+      <div class="adslot-container">
+        <div class="adslot-title">Slot 1</div>
+        <div class="adslot" id='Div1'>
+          <script type='text/javascript'>
+            googletag.cmd.push(function () {
+              googletag.display('Div1');
+            });
+          </script>
+        </div>
+      </div>
+      <div class="adslot-container">
+        <div class="adslot-title">Slot 2</div>
+        <div class="adslot" id='Div2'>
+          <script type='text/javascript'>
+            googletag.cmd.push(function () {
+              googletag.display('Div2');
+            });
+          </script>
+        </div>
+      </div>
+      <div class="adslot-container">
+        <div class="adslot-title">Slot 3</div>
+        <div class="adslot" id='Div3'>
+          <script type='text/javascript'>
+            googletag.cmd.push(function () {
+              googletag.display('Div3');
+            });
+          </script>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

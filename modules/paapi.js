@@ -120,8 +120,8 @@ export function addComponentAuctionHook(next, request, componentAuctionConfig) {
   if (getFledgeConfig().enabled) {
     const {adUnitCode, auctionId, ortb2, ortb2Imp} = request;
     const configs = pendingForAuction(auctionId);
-    // eslint-disable-next-line no-console
-    console.log({ next, request, componentAuctionConfig, adUnitCode, auctionId, ortb2, ortb2Imp, configs });
+    // // eslint-disable-next-line no-console
+    // console.log({ next, request, componentAuctionConfig, adUnitCode, auctionId, ortb2, ortb2Imp, configs });
     if (configs != null) {
       setFPDSignals(componentAuctionConfig, {ortb2, ortb2Imp, requestId: request.bidId});
       !configs.hasOwnProperty(adUnitCode) && (configs[adUnitCode] = []);
