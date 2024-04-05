@@ -16,6 +16,7 @@ const MODULE = 'PAAPI';
 
 const submodules = [];
 const USED = new WeakSet();
+let requestBidIds = [];
 
 export function registerSubmodule(submod) {
   submodules.push(submod);
@@ -90,6 +91,7 @@ function getSlotSignals(bidsReceived = [], bidRequests = []) {
 }
 
 function onAuctionEnd({auctionId, bidsReceived, bidderRequests, adUnitCodes}) {
+  requestBidIds = [];
   const allReqs = bidderRequests?.flatMap(br => br.bids);
   const paapiConfigs = {};
   (adUnitCodes || []).forEach(au => {
@@ -120,10 +122,11 @@ export function addComponentAuctionHook(next, request, componentAuctionConfig) {
   if (getFledgeConfig().enabled) {
     const {adUnitCode, auctionId, ortb2, ortb2Imp} = request;
     const configs = pendingForAuction(auctionId);
-    // // eslint-disable-next-line no-console
-    // console.log({ next, request, componentAuctionConfig, adUnitCode, auctionId, ortb2, ortb2Imp, configs });
+    // eslint-disable-next-line no-console
+    console.log({ next, request, componentAuctionConfig, adUnitCode, auctionId, ortb2, ortb2Imp, configs });
     if (configs != null) {
-      setFPDSignals(componentAuctionConfig, {ortb2, ortb2Imp, requestId: request.bidId});
+      requestBidIds.push(request.bidId);
+      setFPDSignals(componentAuctionConfig, {ortb2, ortb2Imp, requestBidIds});
       !configs.hasOwnProperty(adUnitCode) && (configs[adUnitCode] = []);
       configs[adUnitCode].push(componentAuctionConfig);
       request.componentAuctionConfig = componentAuctionConfig;
