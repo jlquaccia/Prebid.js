@@ -16,7 +16,7 @@ const MODULE = 'PAAPI';
 
 const submodules = [];
 const USED = new WeakSet();
-let requestBidIds = [];
+// let requestBidIds = [];
 
 export function registerSubmodule(submod) {
   submodules.push(submod);
@@ -91,7 +91,7 @@ function getSlotSignals(bidsReceived = [], bidRequests = []) {
 }
 
 function onAuctionEnd({auctionId, bidsReceived, bidderRequests, adUnitCodes}) {
-  requestBidIds = [];
+  // requestBidIds = [];
   const allReqs = bidderRequests?.flatMap(br => br.bids);
   const paapiConfigs = {};
   (adUnitCodes || []).forEach(au => {
@@ -125,12 +125,12 @@ export function addComponentAuctionHook(next, request, componentAuctionConfig) {
     // eslint-disable-next-line no-console
     console.log({ next, request, componentAuctionConfig, adUnitCode, auctionId, ortb2, ortb2Imp, configs });
     if (configs != null) {
-      requestBidIds.push(request.bidId);
-      setFPDSignals(componentAuctionConfig, {ortb2, ortb2Imp, requestBidIds});
+      // requestBidIds.push(request.bidId);
+      // setFPDSignals(componentAuctionConfig, {ortb2, ortb2Imp, requestBidIds});
+      setFPDSignals(componentAuctionConfig, {ortb2, ortb2Imp, pbjsBidRequestId: request.bidId});
       !configs.hasOwnProperty(adUnitCode) && (configs[adUnitCode] = []);
       configs[adUnitCode].push(componentAuctionConfig);
-      request.componentAuctionConfig = componentAuctionConfig;
-      // request.ortb2Imp.ext.componentAuctionConfig = componentAuctionConfig;
+      // request.componentAuctionConfig = componentAuctionConfig;
     } else {
       logWarn(MODULE, `Received component auction config for auction that has closed (auction '${auctionId}', adUnit '${adUnitCode}')`, componentAuctionConfig);
     }
