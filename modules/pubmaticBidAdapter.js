@@ -1405,8 +1405,8 @@ export const spec = {
             // }
           };
           delete cfg['trustedScoringSignalsURL'];
-          // eslint-disable-next-line no-console
-          console.log({ bidId, cfg });
+          // // eslint-disable-next-line no-console
+          // console.log({ bidId, cfg });
 
           return {
             bidId,
@@ -1415,6 +1415,8 @@ export const spec = {
             }, cfg)
           }
         });
+        // eslint-disable-next-line no-console
+        console.log('pubmatic bids: ', { bids: bidResponses });
         return {
           bids: bidResponses,
           fledgeAuctionConfigs,

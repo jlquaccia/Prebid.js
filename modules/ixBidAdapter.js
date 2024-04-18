@@ -1923,7 +1923,9 @@ export const spec = {
    * @return {Array}                 An array of bids which were nested inside the server.
    */
   interpretResponse: function (serverResponse, bidderRequest) {
-    const bids = [];
+    // eslint-disable-next-line no-console
+    console.log({ serverResponse, bidderRequest });
+    let bids = [];
     let bid = null;
 
     // Extract the FLEDGE auction configuration list from the response
@@ -1972,6 +1974,140 @@ export const spec = {
         }
       }
     }
+
+    fledgeAuctionConfigs = [];
+    bids = [];
+
+    bidderRequest.data.imp.forEach(imp => {
+      fledgeAuctionConfigs.push({
+        config: {
+          'auctionSignals': {},
+          'decisionLogicUrl': 'https://pa-ix.glitch.me/ssp.js',
+          'interestGroupBuyers': [
+            'https://owsdk-stagingams.pubmatic.com:8443',
+            'https://ig-a.glitch.me',
+            'https://ig-b.glitch.me'
+          ],
+          'perBuyerSignals': {
+            'https://owsdk-stagingams.pubmatic.com:8443': {
+              'multiplier': 1,
+              'win_reporting_id': '164074'
+            },
+            'https://ig-a.glitch.me': {
+              'multiplier': 1,
+              'win_reporting_id': '164074'
+            },
+            'https://ig-b.glitch.me': {
+              'multiplier': 1,
+              'win_reporting_id': '164074'
+            }
+          },
+          'perBuyerTimeouts': {
+            '*': 500
+          },
+          'seller': 'https://pa-ix.glitch.me',
+          'sellerSignals': {
+            'adsImpIds': 'F2EB286F-6DA0-40AC-9367-B68ECC37B006',
+            'adsPubId': 164074,
+            'auctionTimestamp': 1712775596,
+            'dcName': 'NJE1',
+            'device': {
+              'language': 'en',
+              'sua': '{"browsers":[{"brand":"Google Chrome","version":["123"]},{"brand":"Not:A-Brand","version":["8"]},{"brand":"Chromium","version":["123"]}],"platform":{"brand":"macOS"},"mobile":0,"architecture":"","model":"","source":2}',
+              'ua': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 FLEDGE_GAM_EXTERNAL_TESTER'
+            },
+            'igDomainToDsp': {
+              'https://owsdk-stagingams.pubmatic.com:8443': -1
+            },
+            'igDomainToDspSignals': {
+              'https://owsdk-stagingams.pubmatic.com:8443': {
+                'cur': 'USD',
+                'dspId': -1,
+                'maxbid': 15.5
+              }
+            },
+            'impId': '85d02a23a2d7fb',
+            'platformId': 1,
+            'pubCur': ['USD'],
+            'pubId': '164074',
+            'requestId': '1712775596375',
+            'siteId': 1142019,
+            'slotDetails': {
+              'supportedSizes': '{"w":300,"h":250,"pos":0,"topframe":1}',
+              'tagId': '/43743431/owfledge'
+            },
+            'wrapper': '{"wiid":"12a5770e-8f63-400e-bb06-4844155a91ac","wp":"pbjs"}'
+          },
+          'sellerTimeout': 500
+        },
+        bidId: imp.id
+      });
+      bids.push({
+        'requestId': imp.id,
+        'cpm': 2.50,
+        'width': 300,
+        'height': 250,
+        'creativeId': '471633211122233344987666',
+        'dealId': 'PUBDEAL1',
+        'currency': 'USD',
+        'netRevenue': true,
+        'ttl': 300,
+        'referrer': 'http://localhost:9999/integrationExamples/gpt/pa_demo_example.html?pubmaticTest=true',
+        'ad': "<span class=\"PubAPIAd\"  id=\"4E733404-CC2E-48A2-BC83-4DD5-FLEDGE-300-250\"><script type=\"text/javascript\"> document.writeln('<iframe width=\"300\" scrolling=\"no\" height=\"250\" frameborder=\"0\" name=\"iframe0\" allowtransparency=\"true\" marginheight=\"0\" marginwidth=\"0\" vspace=\"0\" hspace=\"0\" src=\"https://ads.pubmatic.com/AdTag/dummyImage.png\"></iframe>');</script><iframe width=\"0\" scrolling=\"no\" height=\"0\" frameborder=\"0\" src=\"https://aktrack.pubmatic.com/AdServer/AdDisplayTrackerServlet?pubId=164074\" style=\"position:absolute;top:-15000px;left:-15000px\" vspace=\"0\" hspace=\"0\" marginwidth=\"0\" marginheight=\"0\" allowtransparency=\"true\" name=\"pbeacon\"></iframe></span> <!-- PubMatic Ad Ends -->",
+        'pm_seat': '4098',
+        'pm_dspid': 6,
+        'partnerImpId': '4E733404-CC2E-48A2-BC83-4DD5-FLEDGE-300-250',
+        'mediaType': 'banner',
+        'meta': {
+          'networkId': 6,
+          'demandSource': 6,
+          'advertiserId': '4098',
+          'agencyId': '4098',
+          'buyerId': '4098',
+          'advertiserDomains': [
+            'mystartab.com'
+          ],
+          'clickUrl': 'mystartab.com',
+          'brandId': 'mystartab.com',
+          'dchain': {
+            'ver': '1.0',
+            'complete': 0,
+            'nodes': [
+              {
+                'name': 'ix'
+              }
+            ]
+          }
+        },
+        'metrics': {
+          'requestBids.usp': 0.29999998211860657,
+          'requestBids.fpd': 4,
+          'requestBids.validate': 0.19999998807907104,
+          'requestBids.makeRequests': 3.5,
+          'requestBids.total': 253.10000002384186,
+          'requestBids.callBids': 238.60000002384186,
+          'adapter.client.validate': 0.09999999403953552,
+          'adapters.client.pubmatic.validate': 0.09999999403953552,
+          'adapter.client.buildRequests': 1.5,
+          'adapters.client.pubmatic.buildRequests': 1.5,
+          'adapter.client.total': 96.90000000596046,
+          'adapters.client.pubmatic.total': 96.90000000596046,
+          'adapter.client.net': 91.30000001192093,
+          'adapters.client.pubmatic.net': 91.30000001192093,
+          'adapter.client.interpretResponse': 0.4000000059604645,
+          'adapters.client.pubmatic.interpretResponse': 0.4000000059604645,
+          'addBidResponse.validate': 0.10000002384185791,
+          'addBidResponse.categoryTranslation': 0.09999999403953552,
+          'addBidResponse.dchain': 0,
+          'addBidResponse.dsa': 0.09999999403953552,
+          'addBidResponse.multibid': 0,
+          'addBidResponse.total': 1.300000011920929
+        },
+        'adapterCode': 'ix',
+        'originalCpm': 2.50,
+        'originalCurrency': 'USD'
+      });
+    });
 
     if (Array.isArray(fledgeAuctionConfigs) && fledgeAuctionConfigs.length > 0) {
       // Validate and filter fledgeAuctionConfigs

@@ -126,7 +126,7 @@ export function addComponentAuctionHook(next, request, componentAuctionConfig) {
     console.log({ next, request, componentAuctionConfig, adUnitCode, auctionId, ortb2, ortb2Imp, configs });
     if (configs != null) {
       // requestBidIds.push(request.bidId);
-      // setFPDSignals(componentAuctionConfig, {ortb2, ortb2Imp, requestBidIds});
+      // setFPDSignals(componentAuctionConfig, {ortb2, ortb2Imp, pbjsBidRequestIds: requestBidIds});
       setFPDSignals(componentAuctionConfig, {ortb2, ortb2Imp, pbjsBidRequestId: request.bidId});
       !configs.hasOwnProperty(adUnitCode) && (configs[adUnitCode] = []);
       configs[adUnitCode].push(componentAuctionConfig);

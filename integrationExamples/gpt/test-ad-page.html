@@ -1,0 +1,249 @@
+<html>
+
+<head>
+  <script async src="../../build/dev/prebid.js"></script>
+  <script async src="https://www.googletagservices.com/tag/js/gpt.js"></script>
+  <script>
+    var FAILSAFE_TIMEOUT = 3300;
+    var PREBID_TIMEOUT = 1000;
+
+    var adUnits = [
+      {
+        code: 'div1',
+        mediaTypes: {
+          banner: {
+            sizes: [[728, 90]]
+          }
+        },
+        bids: [
+          {
+            bidder: 'rubicon',
+            params: {
+              accountId: 14062,
+              siteId: 70608,
+              zoneId: 498816
+            }
+          }
+        ]
+      },
+      {
+        code: 'div2',
+        mediaTypes: {
+          banner: {
+            sizes: [[300, 250]]
+          }
+        },
+        bids: [
+          {
+            bidder: 'rubicon',
+            params: {
+              accountId: 14062,
+              siteId: 70608,
+              zoneId: 498816
+            }
+          }
+        ]
+      },
+      {
+        code: 'div3',
+        mediaTypes: {
+          banner: {
+            sizes: [[300, 250]],
+            battr: []
+          }
+        },
+        bids: [{
+          bidder: 'tpmn',
+          params: {
+            inventoryId: 2,
+            bidFloor: 0.1,
+          }
+        }]
+      },
+      {
+        code: 'div4',
+        mediaTypes: {
+          banner: {
+            sizes: [[320, 320]]
+          }
+        },
+        bids: [{
+          bidder: 'adnuntius',
+          params: {
+            auId: "201208",
+            network: "adnuntius",
+            bidType: 'netBid'
+          }
+        }]
+      },
+      {
+        code: 'div5',
+        mediaTypes: {
+          banner: {
+            sizes: [
+              [300, 250],
+              [300, 600]
+            ]
+          }
+        },
+        bids: [{
+          bidder: 'ix',
+          params: {
+            siteId: '9999990'
+          }
+        }
+        ]
+      },
+      {
+        code: 'div6',
+        mediaTypes: {
+          banner: {
+            sizes: [
+              [728, 90],
+              [970, 250]
+            ]
+          }
+        },
+        bids: [{
+          bidder: 'appnexus',
+          params: {
+            placementId: 13144370
+          }
+        }]
+      }
+    ];
+
+    var pbjs = pbjs || {};
+    pbjs.que = pbjs.que || [];
+  </script>
+
+  <script>
+    var googletag = googletag || {};
+    googletag.cmd = googletag.cmd || [];
+    googletag.cmd.push(function () {
+      googletag.pubads().disableInitialLoad();
+    });
+
+    pbjs.que.push(function () {
+      pbjs.setConfig({
+        debug: true
+      });
+      pbjs.addAdUnits(adUnits);
+      pbjs.requestBids({
+        bidsBackHandler: sendAdserverRequest,
+        timeout: PREBID_TIMEOUT
+      });
+    });
+
+    function sendAdserverRequest() {
+      if (pbjs.adserverRequestSent) return;
+      pbjs.adserverRequestSent = true;
+      googletag.cmd.push(function () {
+        pbjs.que.push(function () {
+          pbjs.setTargetingForGPTAsync();
+          googletag.pubads().refresh();
+        });
+      });
+    }
+
+    setTimeout(function () {
+      sendAdserverRequest();
+    }, FAILSAFE_TIMEOUT);
+
+  </script>
+
+  <script>
+    googletag.cmd.push(function () {
+      googletag
+        .defineSlot('/19968336/header-bid-tag-0', [[728, 90]], 'div1')
+        .addService(googletag.pubads());
+      googletag
+        .defineSlot('/19968336/header-bid-tag-1', [[300, 250]], 'div2')
+        .addService(googletag.pubads());
+      googletag
+        .defineSlot('/19968336/header-bid-tag-0', [[300, 250]], 'div3')
+        .addService(googletag.pubads());
+      googletag
+        .defineSlot('/19660636/320x320', [320, 320], 'div4')
+        .addService(googletag.pubads());
+      googletag
+        .defineSlot('/19968336/header-bid-tag-2', [
+          [300, 250],
+          [300, 600]
+        ], 'div5')
+        .addService(googletag.pubads());
+      googletag
+        .defineSlot('/19968336/header-bid-tag-3', [
+          [728, 90],
+          [970, 250]
+        ], 'div6')
+        .addService(googletag.pubads());
+
+      googletag.pubads().disableInitialLoad();
+      googletag.pubads().enableSingleRequest();
+      googletag.enableServices();
+    });
+  </script>
+</head>
+
+<body>
+  <h2>Prebid.js Test</h2>
+
+  <h2>div1</h2>
+  <div id="div1">
+    <script>
+      googletag.cmd.push(function () {
+        googletag.display('div1');
+      });
+    </script>
+  </div>
+
+  <h2>div2</h2>
+  <div id="div2">
+    <script>
+      googletag.cmd.push(function () {
+        googletag.display('div2');
+      });
+    </script>
+  </div>
+
+  <h2>div3</h2>
+  <div id='div3'>
+    <script>
+      googletag.cmd.push(function () {
+        googletag.display('div3');
+      });
+    </script>
+  </div>
+
+  <h2>div4</h2>
+  <div id='div4' style='min-width: 320px; min-height: 320px;'>
+    <script>
+      googletag.cmd.push(function () {
+        googletag.display('div4');
+      });
+    </script>
+  </div>
+
+  <h2>div5</h2>
+  <div id='div5'>
+    <script type='text/javascript'>
+      googletag.cmd.push(function () {
+        googletag.display('div5');
+      });
+
+    </script>
+  </div>
+
+  <h2>div6</h2>
+  <div id='div6'>
+    <script type='text/javascript'>
+      googletag.cmd.push(function () {
+        googletag.display('div6');
+      });
+
+    </script>
+  </div>
+</body>
+
+</html>

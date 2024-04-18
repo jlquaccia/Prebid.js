@@ -107,15 +107,15 @@
           {
             bidder: 'rubicon',
             params: {
-              accountId: 7780,                     // replace account/site/zone params
-              siteId: 87184,
-              zoneId: 413290,
-              inventory: {
-                prodtype: ["tech", "mobile"]
-              },
-              visitor: {
-                ucat: ["new"]
-              }
+              accountId: 14062,
+              siteId: 70608,
+              zoneId: 498816
+            }
+          },
+          {
+            bidder: 'ix',
+            params: {
+              siteId: '9999990'
             }
           },
           {
@@ -152,6 +152,14 @@
             }
           },
           {
+            bidder: 'rubicon',
+            params: {
+              accountId: 14062,
+              siteId: 70608,
+              zoneId: 498816
+            }
+          },
+          {
             bidder: '33across',
             params: {
               siteId: 'examplePub123',    // required 
@@ -184,6 +192,14 @@
               adSlot: '/43743431/owfledge',
               pmzoneid: 'zone2',
               kadpageurl: 'http://www.microsoft.com/key1=1&key2=2&fledge_type=1'
+            }
+          },
+          {
+            bidder: 'rubicon',
+            params: {
+              accountId: 14062,
+              siteId: 70608,
+              zoneId: 498816
             }
           },
           {
@@ -244,7 +260,7 @@
       });
 
       pbjs.setBidderConfig({
-        bidders: ['pubmatic'],
+        bidders: ['pubmatic', 'rubicon', 'ix'],
         config: {
           fledgeEnabled: true
         }

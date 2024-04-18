@@ -633,6 +633,8 @@ export const spec = {
    * @return {{fledgeAuctionConfigs: *, bids: *}} An array of bids which
    */
   interpretResponse: function (responseObj, request) {
+    // eslint-disable-next-line no-console
+    console.log({ responseObj, request });
     responseObj = responseObj.body;
     const {data} = request;
 
@@ -731,9 +733,230 @@ export const spec = {
       return (adB.cpm || 0.0) - (adA.cpm || 0.0);
     });
 
+    // eslint-disable-next-line no-console
+    console.log('test 11');
+
     let fledgeAuctionConfigs = responseObj.component_auction_config?.map(config => {
       return { config, bidId: config.bidId }
     });
+
+    let bReq = JSON.parse(JSON.stringify(request.bidRequest));
+    const bidId = bReq.bidId;
+
+    fledgeAuctionConfigs = [];
+    // cfg['decisionLogicUrl'] = 'https://owsdk-stagingams.pubmatic.com:8443/openwrap/TestPages/jason/ssp.js';
+    // cfg['seller'] = 'https://owsdk-stagingams.pubmatic.com:8443';
+    // cfg['sellerSignals']['igDomainToDsp'] = { 'https://owsdk-stagingams.pubmatic.com:8443': -1 };
+    // cfg['interestGroupBuyers'] = ['https://owsdk-stagingams.pubmatic.com:8443', 'https://td.doubleclick.net'];
+    // cfg['perBuyerSignals'] = {
+    //   'https://owsdk-stagingams.pubmatic.com:8443': {
+    //     'multiplier': 1,
+    //     'win_reporting_id': '164074'
+    //   },
+    //   // "https://td.doubleclick.net": {
+    //   //     "multiplier": 1.2,
+    //   //     "win_reporting_id": "989"
+    //   // }
+    // };
+    fledgeAuctionConfigs.push({
+      config: {
+        'auctionSignals': {
+          // 'prebid': {
+          //   'ortb2': {
+          //     'source': {},
+          //     'site': {
+          //       'domain': 'localhost:9999',
+          //       'publisher': {
+          //         'domain': 'localhost:9999'
+          //       },
+          //       'page': 'http://localhost:9999/integrationExamples/gpt/pa_demo_example.html?pubmaticTest=true',
+          //       'keywords': 'c:23041_p:50_protocol:2_adt:13_domain:abc.com_ae:1_case:IGbidDSP11,c:22987_p:60_protocol:2_adt:13_domain:abc.com_ae:1_case:IGbidDSP12'
+          //     },
+          //     'device': {
+          //       'w': 3440,
+          //       'h': 1316,
+          //       'dnt': 0,
+          //       'ua': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 FLEDGE_GAM_EXTERNAL_TESTER',
+          //       'language': 'en',
+          //       'sua': {
+          //         'source': 2,
+          //         'platform': {
+          //           'brand': 'macOS'
+          //         },
+          //         'browsers': [
+          //           {
+          //             'brand': 'Google Chrome',
+          //             'version': ['123']
+          //           },
+          //           {
+          //             'brand': 'Not:A-Brand',
+          //             'version': ['8']
+          //           },
+          //           {
+          //             'brand': 'Chromium',
+          //             'version': ['123']
+          //           }
+          //         ],
+          //         'mobile': 0,
+          //         'model': '',
+          //         'architecture': ''
+          //       }
+          //     },
+          //     'user': {
+          //       'data': [
+          //         {
+          //           'ext': {
+          //             'segtax': 601,
+          //             'segclass': '4'
+          //           },
+          //           'segment': [
+          //             {
+          //               'id': '126'
+          //             }
+          //           ],
+          //           'name': 'ads.pubmatic.com'
+          //         },
+          //         {
+          //           'ext': {
+          //             'segtax': 601,
+          //             'segclass': '4'
+          //           },
+          //           'segment': [
+          //             {
+          //               'id': '126'
+          //             },
+          //             {
+          //               'id': '231'
+          //             }
+          //           ],
+          //           'name': 'pa.openx.net'
+          //         },
+          //         {
+          //           'ext': {
+          //             'segtax': 601,
+          //             'segclass': '4'
+          //           },
+          //           'segment': [
+          //             {
+          //               'id': '227'
+          //             }
+          //           ],
+          //           'name': 'cdn.taboola.com'
+          //         },
+          //         {
+          //           'ext': {
+          //             'segtax': 601,
+          //             'segclass': '4'
+          //           },
+          //           'segment': [
+          //             {
+          //               'id': '227'
+          //             }
+          //           ],
+          //           'name': '360yield.com'
+          //         },
+          //         {
+          //           'ext': {
+          //             'segtax': 601,
+          //             'segclass': '4'
+          //           },
+          //           'segment': [
+          //             {
+          //               'id': '227'
+          //             }
+          //           ],
+          //           'name': 'onetag-sys.com'
+          //         },
+          //         {
+          //           'ext': {
+          //             'segtax': 601,
+          //             'segclass': '4'
+          //           },
+          //           'segment': [
+          //             {
+          //               'id': '227'
+          //             }
+          //           ],
+          //           'name': 'topics.authorizedvault.com'
+          //         }
+          //       ]
+          //     }
+          //   },
+          //   'ortb2Imp': {
+          //     'ext': {
+          //       'ae': 1,
+          //       'data': {
+          //         'pbadslot': 'Div1'
+          //       }
+          //     }
+          //   },
+          //   'pbjsBidRequestId': '85d02a23a2d7fb'
+          // }
+        },
+        'decisionLogicUrl': 'https://pa-rubicon.glitch.me/ssp.js',
+        'interestGroupBuyers': [
+          'https://owsdk-stagingams.pubmatic.com:8443',
+          'https://ig-a.glitch.me',
+          'https://ig-b.glitch.me'
+        ],
+        'perBuyerSignals': {
+          'https://owsdk-stagingams.pubmatic.com:8443': {
+            'multiplier': 1,
+            'win_reporting_id': '164074'
+          },
+          'https://ig-a.glitch.me': {
+            'multiplier': 1,
+            'win_reporting_id': '164074'
+          },
+          'https://ig-b.glitch.me': {
+            'multiplier': 1,
+            'win_reporting_id': '164074'
+          }
+        },
+        'perBuyerTimeouts': {
+          '*': 500
+        },
+        'seller': 'https://pa-rubicon.glitch.me',
+        'sellerSignals': {
+          'adsImpIds': 'F2EB286F-6DA0-40AC-9367-B68ECC37B006',
+          'adsPubId': 164074,
+          'auctionTimestamp': 1712775596,
+          'dcName': 'NJE1',
+          'device': {
+            'language': 'en',
+            'sua': '{"browsers":[{"brand":"Google Chrome","version":["123"]},{"brand":"Not:A-Brand","version":["8"]},{"brand":"Chromium","version":["123"]}],"platform":{"brand":"macOS"},"mobile":0,"architecture":"","model":"","source":2}',
+            'ua': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 FLEDGE_GAM_EXTERNAL_TESTER'
+          },
+          'igDomainToDsp': {
+            'https://owsdk-stagingams.pubmatic.com:8443': -1
+          },
+          'igDomainToDspSignals': {
+            'https://owsdk-stagingams.pubmatic.com:8443': {
+              'cur': 'USD',
+              'dspId': -1,
+              'maxbid': 15.5
+            }
+          },
+          'impId': '85d02a23a2d7fb',
+          'platformId': 1,
+          'pubCur': ['USD'],
+          'pubId': '164074',
+          'requestId': '1712775596375',
+          'siteId': 1142019,
+          'slotDetails': {
+            'supportedSizes': '{"w":300,"h":250,"pos":0,"topframe":1}',
+            'tagId': '/43743431/owfledge'
+          },
+          'wrapper': '{"wiid":"12a5770e-8f63-400e-bb06-4844155a91ac","wp":"pbjs"}'
+        },
+        'sellerTimeout': 500,
+        'trustedScoringSignalsURL': 'https://pa-rubicon.glitch.me/kv',
+      },
+      bidId
+    });
+
+    // eslint-disable-next-line no-console
+    console.log('rubicon bids: ', { bids });
 
     if (fledgeAuctionConfigs) {
       return { bids, fledgeAuctionConfigs };
