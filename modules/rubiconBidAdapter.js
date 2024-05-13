@@ -895,20 +895,10 @@ export const spec = {
         },
         'decisionLogicUrl': 'https://pa-rubicon.glitch.me/ssp.js',
         'interestGroupBuyers': [
-          'https://owsdk-stagingams.pubmatic.com:8443',
-          'https://ig-a.glitch.me',
-          'https://ig-b.glitch.me'
+          'https://ig-1.glitch.me'
         ],
         'perBuyerSignals': {
-          'https://owsdk-stagingams.pubmatic.com:8443': {
-            'multiplier': 1,
-            'win_reporting_id': '164074'
-          },
-          'https://ig-a.glitch.me': {
-            'multiplier': 1,
-            'win_reporting_id': '164074'
-          },
-          'https://ig-b.glitch.me': {
+          'https://ig-1.glitch.me': {
             'multiplier': 1,
             'win_reporting_id': '164074'
           }

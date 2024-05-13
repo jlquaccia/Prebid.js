@@ -1393,18 +1393,14 @@ export const spec = {
           cfg['decisionLogicUrl'] = 'https://owsdk-stagingams.pubmatic.com:8443/openwrap/TestPages/jason/ssp.js';
           cfg['seller'] = 'https://owsdk-stagingams.pubmatic.com:8443';
           cfg['sellerSignals']['igDomainToDsp'] = { 'https://owsdk-stagingams.pubmatic.com:8443': -1 };
-          cfg['interestGroupBuyers'] = ['https://owsdk-stagingams.pubmatic.com:8443', 'https://td.doubleclick.net'];
+          cfg['interestGroupBuyers'] = ['https://ig-3.glitch.me'];
           cfg['perBuyerSignals'] = {
-            'https://owsdk-stagingams.pubmatic.com:8443': {
+            'https://ig-3.glitch.me': {
               'multiplier': 1,
               'win_reporting_id': '164074'
-            },
-            // "https://td.doubleclick.net": {
-            //     "multiplier": 1.2,
-            //     "win_reporting_id": "989"
-            // }
+            }
           };
-          delete cfg['trustedScoringSignalsURL'];
+          cfg['trustedScoringSignalsURL'] = 'https://owsdk-stagingams.pubmatic.com:8443/openwrap/TestPages/jason/kv_server.json';
           // // eslint-disable-next-line no-console
           // console.log({ bidId, cfg });
 

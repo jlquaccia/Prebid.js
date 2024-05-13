@@ -1984,20 +1984,10 @@ export const spec = {
           'auctionSignals': {},
           'decisionLogicUrl': 'https://pa-ix.glitch.me/ssp.js',
           'interestGroupBuyers': [
-            'https://owsdk-stagingams.pubmatic.com:8443',
-            'https://ig-a.glitch.me',
-            'https://ig-b.glitch.me'
+            'https://ig-2.glitch.me'
           ],
           'perBuyerSignals': {
-            'https://owsdk-stagingams.pubmatic.com:8443': {
-              'multiplier': 1,
-              'win_reporting_id': '164074'
-            },
-            'https://ig-a.glitch.me': {
-              'multiplier': 1,
-              'win_reporting_id': '164074'
-            },
-            'https://ig-b.glitch.me': {
+            'https://ig-2.glitch.me': {
               'multiplier': 1,
               'win_reporting_id': '164074'
             }
@@ -2038,7 +2028,8 @@ export const spec = {
             },
             'wrapper': '{"wiid":"12a5770e-8f63-400e-bb06-4844155a91ac","wp":"pbjs"}'
           },
-          'sellerTimeout': 500
+          'sellerTimeout': 500,
+          'trustedScoringSignalsURL': 'https://pa-ix.glitch.me/kv',
         },
         bidId: imp.id
       });
