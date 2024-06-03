@@ -893,7 +893,7 @@ export const spec = {
           //   'pbjsBidRequestId': '85d02a23a2d7fb'
           // }
         },
-        'decisionLogicUrl': 'https://pa-rubicon.glitch.me/ssp.js',
+        'decisionLogicURL': 'https://pa-rubicon.glitch.me/ssp.js',
         'interestGroupBuyers': [
           'https://ig-1.glitch.me'
         ],

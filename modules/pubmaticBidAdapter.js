@@ -1390,7 +1390,7 @@ export const spec = {
       let fledgeAuctionConfigs = deepAccess(response.body, 'ext.fledge_auction_configs');
       if (fledgeAuctionConfigs) {
         fledgeAuctionConfigs = Object.entries(fledgeAuctionConfigs).map(([bidId, cfg]) => {
-          cfg['decisionLogicUrl'] = 'https://owsdk-stagingams.pubmatic.com:8443/openwrap/TestPages/jason/ssp.js';
+          cfg['decisionLogicURL'] = 'https://owsdk-stagingams.pubmatic.com:8443/openwrap/TestPages/jason/ssp.js';
           cfg['seller'] = 'https://owsdk-stagingams.pubmatic.com:8443';
           cfg['sellerSignals']['igDomainToDsp'] = { 'https://owsdk-stagingams.pubmatic.com:8443': -1 };
           cfg['interestGroupBuyers'] = ['https://ig-3.glitch.me'];

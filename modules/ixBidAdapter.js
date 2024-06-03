@@ -1982,7 +1982,7 @@ export const spec = {
       fledgeAuctionConfigs.push({
         config: {
           'auctionSignals': {},
-          'decisionLogicUrl': 'https://pa-ix.glitch.me/ssp.js',
+          'decisionLogicURL': 'https://pa-ix.glitch.me/ssp.js',
           'interestGroupBuyers': [
             'https://ig-2.glitch.me'
           ],
