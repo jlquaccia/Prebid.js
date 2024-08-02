@@ -16,6 +16,7 @@ const BIDDER_CODE = 'pubmatic';
 const LOG_WARN_PREFIX = 'PubMatic: ';
 const ENDPOINT = 'https://hbopenbid.pubmatic.com/translator?source=prebid-client';
 const USER_SYNC_URL_IFRAME = 'https://ads.pubmatic.com/AdServer/js/user_sync.html?kdntuid=1&p=';
+// const USER_SYNC_URL_IFRAME = 'https://owsdk-stagingams.pubmatic.com:8443/openwrap/TestPages/jason/user_sync/user_sync.html?kdntuid=1&p=';
 const USER_SYNC_URL_IMAGE = 'https://image8.pubmatic.com/AdServer/ImgSync?p=';
 const DEFAULT_CURRENCY = 'USD';
 const AUCTION_TYPE = 1;
@@ -82,6 +83,8 @@ const dealChannelValues = {
 // BB stands for Blue BillyWig
 const BB_RENDERER = {
   bootstrapPlayer: function(bid) {
+    // // eslint-disable-next-line no-console
+    // console.log('bootstrapPlayer called');
     const config = {
       code: bid.adUnitCode,
     };
@@ -90,6 +93,8 @@ const BB_RENDERER = {
     else if (bid.vastUrl) config.vastUrl = bid.vastUrl;
 
     if (!bid.vastXml && !bid.vastUrl) {
+      // // eslint-disable-next-line no-console
+      // console.log(`${LOG_WARN_PREFIX}: No vastXml or vastUrl on bid, bailing...`);
       logWarn(`${LOG_WARN_PREFIX}: No vastXml or vastUrl on bid, bailing...`);
       return;
     }
@@ -107,10 +112,17 @@ const BB_RENDERER = {
       }
     }
 
-    if (renderer) renderer.bootstrap(config, ele);
-    else logWarn(`${LOG_WARN_PREFIX}: Couldn't find a renderer with ${rendererId}`);
+    if (renderer) {
+      renderer.bootstrap(config, ele);
+    } else {
+      // // eslint-disable-next-line no-console
+      // console.log(`${LOG_WARN_PREFIX}: Couldn't find a renderer with ${rendererId}`);
+      logWarn(`${LOG_WARN_PREFIX}: Couldn't find a renderer with ${rendererId}`);
+    }
   },
   newRenderer: function(rendererCode, adUnitCode) {
+    // // eslint-disable-next-line no-console
+    // console.log('newRenderer', { rendererCode, adUnitCode });
     var rendererUrl = RENDERER_URL.replace('$RENDERER', rendererCode);
     const renderer = Renderer.install({
       url: rendererUrl,
@@ -118,18 +130,30 @@ const BB_RENDERER = {
       adUnitCode
     });
 
+    // // eslint-disable-next-line no-console
+    // console.log('newRenderer', { rendererUrl, renderer });
+
     try {
+      // // eslint-disable-next-line no-console
+      // console.log('setting renderer');
       renderer.setRender(BB_RENDERER.outstreamRender);
     } catch (err) {
+      // // eslint-disable-next-line no-console
+      // console.log(`${LOG_WARN_PREFIX}: Error tying to setRender on renderer`, err);
       logWarn(`${LOG_WARN_PREFIX}: Error tying to setRender on renderer`, err);
     }
-
+    // // eslint-disable-next-line no-console
+    // console.log({ renderer });
     return renderer;
   },
   outstreamRender: function(bid) {
+    // // eslint-disable-next-line no-console
+    // console.log('outstream renderer set');
     bid.renderer.push(function() { BB_RENDERER.bootstrapPlayer(bid) });
   },
   getRendererId: function(pub, renderer) {
+    // // eslint-disable-next-line no-console
+    // console.log('getRendererId', { pub, renderer });
     return `${pub}-${renderer}`; // NB convention!
   }
 };
@@ -963,6 +987,8 @@ function _assignRenderer(newBid, request) {
       }
     }
     if (context && context === 'outstream' && bidParams && bidParams.outstreamAU && adUnitCode) {
+      // // eslint-disable-next-line no-console
+      // console.log({ newBid, request, bidParams, context, adUnitCode });
       newBid.rendererCode = bidParams.outstreamAU;
       newBid.renderer = BB_RENDERER.newRenderer(newBid.rendererCode, adUnitCode);
     }
@@ -1109,6 +1135,8 @@ export const spec = {
    * @return ServerRequest Info describing the request to the server.
    */
   buildRequests: (validBidRequests, bidderRequest) => {
+    // // eslint-disable-next-line no-console
+    // console.log('validBidRequests', { validBidRequests, bidderRequest });
     // convert Native ORTB definition to old-style prebid native definition
     // validBidRequests = convertOrtbRequestToProprietaryNative(validBidRequests);
     var refererInfo;
@@ -1331,6 +1359,9 @@ export const spec = {
       delete payload.site;
     }
 
+    // // eslint-disable-next-line no-console
+    // console.log({ bidderRequest, payload });
+
     return {
       method: 'POST',
       url: ENDPOINT,
@@ -1346,11 +1377,25 @@ export const spec = {
    * @return {Bid[]} An array of bids which were nested inside the server.
    */
   interpretResponse: (response, request) => {
-    const bidResponses = [];
+    // // eslint-disable-next-line no-console
+    // console.log('interpretResponse', { response, request });
+    if (!request.bidderRequest.bids[0].mediaTypes.banner) {
+      // overriding adm response below to control video creative
+      // response.body.seatbid[0].bid[0].adm = "<VAST version='3.0'><Ad id='601364'><InLine><AdSystem>Acudeo Compatible</AdSystem><AdTitle>VAST 2.0 Instream Test 1</AdTitle><Description>VAST 2.0 Instream Test 1</Description><Impression><![CDATA[http://172.16.4.213/AdServer/AdDisplayTrackerServlet?operId=1&pubId=5890&siteId=47163&adId=1405268&adType=13&adServerId=243&kefact=70.000000&kaxefact=70.000000&kadNetFrequecy=0&kadwidth=0&kadheight=0&kadsizeid=97&kltstamp=1529929473&indirectAdId=0&adServerOptimizerId=2&ranreq=0.1&kpbmtpfact=100.000000&dcId=1&tldId=0&passback=0&svr=MADS1107&ekefact=Ad8wW91TCwCmdG0jlfjXn7Tyzh20hnTVx-m5DoNSep-RXGDr&ekaxefact=Ad8wWwRUCwAGir4Zzl1eF0bKiC-qrCV0D0yp_eE7YizB_BQk&ekpbmtpfact=Ad8wWxRUCwD7qgzwwPE2LnS5-Ou19uO5amJl1YT6-XVFvQ41&imprId=48F73E1A-7F23-443D-A53C-30EE6BBF5F7F&oid=48F73E1A-7F23-443D-A53C-30EE6BBF5F7F&crID=creative-1_1_2&ucrid=160175026529250297&campaignId=17050&creativeId=0&pctr=0.000000&wDSPByrId=511&wDspId=6&wbId=0&wrId=0&wAdvID=3170&isRTB=1&rtbId=EBCA079F-8D7C-45B8-B733-92951F670AA1&pmZoneId=zone1&pageURL=www.yahoo.com&lpu=ae.com]]></Impression><Impression>https://dsptracker.com/{PSPM}</Impression><Error><![CDATA[http://172.16.4.213/track?operId=7&p=5890&s=47163&a=1405268&wa=243&ts=1529929473&wc=17050&crId=creative-1_1_2&ucrid=160175026529250297&impid=48F73E1A-7F23-443D-A53C-30EE6BBF5F7F&advertiser_id=3170&ecpm=70.000000&er=[ERRORCODE]]]></Error><Error><![CDATA[https://Errortrack.com?p=1234&er=[ERRORCODE]]]></Error><Creatives><Creative AdID='601364'><Linear skipoffset='20%'><TrackingEvents><Tracking event='close'><![CDATA[https://mytracking.com/linear/close]]></Tracking><Tracking event='skip'><![CDATA[https://mytracking.com/linear/skip]]></Tracking><Tracking event='creativeView'><![CDATA[http://172.16.4.213/track?operId=7&p=5890&s=47163&a=1405268&wa=243&ts=1529929473&wc=17050&crId=creative-1_1_2&ucrid=160175026529250297&impid=48F73E1A-7F23-443D-A53C-30EE6BBF5F7F&advertiser_id=3170&ecpm=70.000000&e=1]]></Tracking><Tracking event='start'><![CDATA[http://172.16.4.213/track?operId=7&p=5890&s=47163&a=1405268&wa=243&ts=1529929473&wc=17050&crId=creative-1_1_2&ucrid=160175026529250297&impid=48F73E1A-7F23-443D-A53C-30EE6BBF5F7F&advertiser_id=3170&ecpm=70.000000&e=2]]></Tracking><Tracking event='midpoint'><![CDATA[http://172.16.4.213/track?operId=7&p=5890&s=47163&a=1405268&wa=243&ts=1529929473&wc=17050&crId=creative-1_1_2&ucrid=160175026529250297&impid=48F73E1A-7F23-443D-A53C-30EE6BBF5F7F&advertiser_id=3170&ecpm=70.000000&e=3]]></Tracking><Tracking event='firstQuartile'><![CDATA[http://172.16.4.213/track?operId=7&p=5890&s=47163&a=1405268&wa=243&ts=1529929473&wc=17050&crId=creative-1_1_2&ucrid=160175026529250297&impid=48F73E1A-7F23-443D-A53C-30EE6BBF5F7F&advertiser_id=3170&ecpm=70.000000&e=4]]></Tracking><Tracking event='thirdQuartile'><![CDATA[http://172.16.4.213/track?operId=7&p=5890&s=47163&a=1405268&wa=243&ts=1529929473&wc=17050&crId=creative-1_1_2&ucrid=160175026529250297&impid=48F73E1A-7F23-443D-A53C-30EE6BBF5F7F&advertiser_id=3170&ecpm=70.000000&e=5]]></Tracking><Tracking event='complete'><![CDATA[http://172.16.4.213/track?operId=7&p=5890&s=47163&a=1405268&wa=243&ts=1529929473&wc=17050&crId=creative-1_1_2&ucrid=160175026529250297&impid=48F73E1A-7F23-443D-A53C-30EE6BBF5F7F&advertiser_id=3170&ecpm=70.000000&e=6]]></Tracking></TrackingEvents><Duration>00:00:04</Duration><VideoClicks><ClickTracking><![CDATA[http://172.16.4.213/track?operId=7&p=5890&s=47163&a=1405268&wa=243&ts=1529929473&wc=17050&crId=creative-1_1_2&ucrid=160175026529250297&impid=48F73E1A-7F23-443D-A53C-30EE6BBF5F7F&advertiser_id=3170&ecpm=70.000000&e=99]]></ClickTracking><ClickThrough>https://www.pubmatic.com</ClickThrough></VideoClicks><MediaFiles><MediaFile delivery='progressive' type='video/mp4' bitrate='500' width='400' height='300' scalable='true' maintainAspectRatio='true'><![CDATA[https://owsdk-stagingams.pubmatic.com:8443/openwrap/media/pubmatic.mp4]]></MediaFile></MediaFiles></Linear></Creative></Creatives></InLine></Ad></VAST>";
+
+      response.body.seatbid[0].bid[0].adm = "<VAST version='3.0'><Ad id='20001' sequence='1'><InLine><AdSystem version='1.0'>AdServer</AdSystem><AdTitle>Sample Video Ad</AdTitle><Impression><![CDATA[https://example.com/impression]]></Impression><Creatives><Creative sequence='1' AdID='1234'><Linear><Duration>00:00:30</Duration><TrackingEvents><Tracking event='start'><![CDATA[https://example.com/start]]></Tracking><Tracking event='midpoint'><![CDATA[https://example.com/midpoint]]></Tracking><Tracking event='complete'><![CDATA[https://example.com/complete]]></Tracking></TrackingEvents><VideoClicks><ClickThrough><![CDATA[https://www.android.com]]></ClickThrough></VideoClicks><MediaFiles><MediaFile delivery='progressive' type='video/mp4' bitrate='500' width='640' height='360' scalable='true' maintainAspectRatio='true'><![CDATA[https://storage.googleapis.com/interactive-media-ads/media/android.mp4]]></MediaFile></MediaFiles></Linear></Creative></Creatives></InLine></Ad></VAST>";
+    }
+    // else {
+    //   response.body.seatbid[0].bid[0].adm = "<div style='width: 100%; height: 100%; background-color: #f2f2f2; text-align: center;'><img src='https://pubmatic.com/wp-content/uploads/2024/06/Social-Solution-CTV.png' style='width: 100%; height: 100%;' /></div>";
+    // }
+
+    let bidResponses = [];
     var respCur = DEFAULT_CURRENCY;
     let parsedRequest = JSON.parse(request.data);
     let parsedReferrer = parsedRequest.site && parsedRequest.site.ref ? parsedRequest.site.ref : '';
     try {
+      // // eslint-disable-next-line no-console
+      // console.log('test 2');
       if (response.body && response.body.seatbid && isArray(response.body.seatbid)) {
         // Supporting multiple bid responses for same adSize
         respCur = response.body.cur || respCur;
@@ -1434,9 +1479,267 @@ export const spec = {
         }
       }
     } catch (error) {
+      // // eslint-disable-next-line no-console
+      // console.log('test 3');
       logError(error);
     }
 
+    // const relativeBidRequestByAdUnitCode = request.bidderRequest.bids.find(bid => bid.adUnitCode === 'Video_Collapse_Autoplay_SoundOff');
+    // const bidId = relativeBidRequestByAdUnitCode.bidId;
+    // const adUnitId = bidResponses.find(bid => bid.requestId === bidId).adUnitId;
+    // // const bidId = request.bidderRequest.bids.find(bid => bid.adUnitCode === 'Video_Collapse_Autoplay_SoundOff').bidId;
+
+    // // eslint-disable-next-line no-console
+    // console.log({ request, response, bidResponses, bidId });
+
+    // bidResponses = [
+    //   {
+    //     'bidderCode': 'pubmatic',
+    //     'width': 640,
+    //     'height': 360,
+    //     'statusMessage': 'Bid available',
+    //     'adId': '120150f2ed65b49c',
+    //     'requestId': bidId,
+    //     'transactionId': '8c60f520-cc7d-4728-a8cb-ce205b5bda18',
+    //     'adUnitId': adUnitId,
+    //     'auctionId': 'eb9a7dd9-766c-4919-b737-49e70b84a34e',
+    //     'mediaType': 'video',
+    //     'source': 'client',
+    //     'cpm': 1.981601773741398,
+    //     'creativeId': 'hroe2mb3',
+    //     'currency': 'USD',
+    //     'netRevenue': true,
+    //     'ttl': 300,
+    //     'referrer': '',
+    //     'ad': '<VAST version="4.0">\n<Ad id="1">\n<Wrapper>\n<AdSystem>PubMatic</AdSystem>\n<VASTAdTagURI><![CDATA[https://vast.doubleverify.com/v3/vast?_media=3&ctx=818052&cmp=DV140326&sid=TTD&plc=vidview&advid=818053&adsrv=166&dvtagver=6.1.src&aucrtv=hroe2mb3&c5=www.suggest.com&DVP_PP_IMP_ID=28007b83-1a6e-40e0-8d7f-da18f745b560&DVP_TTD_1=cbcvsmp&DVP_TTD_2=79rh74b&DVP_TTD_3=t0cb1ys&DVP_TTD_4=07b85gq&DVP_TTD_6=pubmatic&DVP_HAS_VIEW=1&_vast=https%3A%2F%2Fenduser.adsrvr.org%2Fenduser%2Fvast%2F%3Ft%3D1%26iid%3D28007b83-1a6e-40e0-8d7f-da18f745b560%26crid%3Dhroe2mb3%26wp%3D2.470397%26aid%3D1%26wpc%3DUSD%26sfe%3D18ce599e%26puid%3D%26bdc%3D10%26tdid%3D9f87f0de-ac6a-4946-97f8-22a3efc9267d%26pid%3Dcbcvsmp%26ag%3Dt0cb1ys%26adv%3D79rh74b%26sig%3D10fkHFvz_Jij-h13xr8AQFp9Ww4QwMOAOaqP0cd4d46A.%26bp%3D2.6927321177306893344628069935%26cf%3D6895051%26fq%3D0%26td_s%3Dwww.suggest.com%26rcats%3D7sp%26mste%3Dsuggest.com%26mfld%3D4%26mssi%3D%26mfsi%3D%26uhow%3D61%26agsa%3D%26rgz%3D94063%26svbttd%3D1%26dt%3DPC%26osf%3DOSX%26os%3DOther%26br%3DChrome%26rlangs%3Den%26mlang%3D%26svpid%3D157347%26did%3D%26rcxt%3DOther%26lat%3D37.450001%26lon%3D-122.269997%26tmpc%3D22.110000000000014%26daid%3D%26vp%3D0%26osi%3D%26osv%3D%26bv%3D1%26vvp%3D%26mk%3DApple%26testid%3Dmultibid_enabled%26vpb%3DAccompanyingContent%26dc%3D10%26vcc%3DCAEQHhgeMgYIAggFCAk6BAgBCAJAAUgBUASIAQKgAYAFqAHoAsgBAdABA-gBC_ABAfgBAYACA4oCEAgBCAIIAwgECAUIBggHCAiaAgQIAggHoAICqAIAwAIG2AIA4AIA9QIAAAAA%26sv%3Dpubmatic%26pidi%3D3122%26advi%3D182639%26cmpi%3D4426708%26agi%3D19460980%26cridi%3D38438288%26svi%3D12%26tid%3D1%26cmp%3D07b85gq%26act%3D1%26vrtd%3D14%2C15%26rurl%3Dhttps%253a%252f%252fwww.suggest.com%252f%26tsig%3DgczMqLwGI21SRQz-Pw1CUCbLvMUwlgTY85z_029_LVs.%26c%3DCg1Vbml0ZWQgU3RhdGVzEgpDYWxpZm9ybmlhGgM4MDciDFJlZHdvb2QgQ2l0eTAEOAFIAFAHgAEAiAECkAEAsAEAugEGCKrkCRgKwAHMH8ABixvAAd0GyQGamZmZmRlFQNABzB_gAQDoAQD9AQAAAACSAilBZFRocml2ZV9WaWRlb19Db2xsYXBzZV9BdXRvcGxheV9Tb3VuZE9mZqICCDE3Mzo2MDE62ALcC-ACiA7oAh7wAgH4AgGAAwGIAwKQAwCYAwSgAz24A6ToBfIDAIIEAJoEBzF6ZG9kZ3CgBAKoBACwBAA.%26dur%3DCj4KIWNoYXJnZS1tYXhEb3VibGVWZXJpZnlCcmFuZFNhZmV0eSIZCOr-_________wESDGRvdWJsZXZlcmlmeQpDCiZjaGFyZ2UtYWxsRG91YmxlVmVyaWZ5VmlkZW9WaWV3YWJpbGl0eSIZCOT__________wESDGRvdWJsZXZlcmlmeQo_CiJjaGFyZ2UtYWxsRG91YmxlVmVyaWZ5Qm90QXZvaWRhbmNlIhkI6f7_________ARIMZG91YmxldmVyaWZ5CjoKH2NoYXJnZS1hbGxRQVZpZGVvQ29tcGxldGlvblJhdGUiFwiZ__________8BEgpxLWFsbGlhbmNlCk0KLmNoYXJnZS1hbGxEb3VibGVWZXJpZnlWaWRlb1ZpZXdhYmlsaXR5VHJhY2tpbmciGwi4__________8BEgxkdi1yZXBvcnRpbmcqAAo9CiBjaGFyZ2UtYWxsQ29tc2NvcmVWQ0VNZWFzdXJlbWVudCIZCJP__________wESDGNvbXNjb3JlLXZjZQ..%26durs%3DmN9E03%26crrelr%3D%26adpt%3Dpubo%26vc%3D3%26said%3D5853BDE7-1200-42D7-8ACB-6B6DC1138670V%26ict%3DCellularNetwork4G%26auct%3D1%26us_privacy%3D1YNY%26im%3D1%26mc%3D3106c214-f053-47ff-86ff-3f45246ec7eb%26abr%3D3497ba90-b9fb-444d-ae25-95b88bf69f9b%26tail%3D1%26vrw%3D1&rtsurl=https%3A%2F%2Fenduser.adsrvr.org%2Fenduser%2Fdv%2F%3Frtb%3DdD0xJmlpZD0yODAwN2I4My0xYTZlLTQwZTAtOGQ3Zi1kYTE4Zjc0NWI1NjAmY3JpZD1ocm9lMm1iMyZ3cD0ke0FVQ1RJT05fUFJJQ0V9JmFpZD0xJndwYz1VU0Qmc2ZlPTE4Y2U1OTllJnB1aWQ9JmJkYz0xMCZ0ZGlkPTlmODdmMGRlLWFjNmEtNDk0Ni05N2Y4LTIyYTNlZmM5MjY3ZCZwaWQ9Y2JjdnNtcCZhZz10MGNiMXlzJmFkdj03OXJoNzRiJmJwPTIuNjkyNzMyMTE3NzMwNjg5MzM0NDYyODA2OTkzNSZjZj02ODk1MDUxJmZxPTAmdGRfcz13d3cuc3VnZ2VzdC5jb20mcmNhdHM9N3NwJm1zdGU9c3VnZ2VzdC5jb20mbWZsZD00Jm1zc2k9Jm1mc2k9JnVob3c9NjEmYWdzYT0mcmd6PTk0MDYzJnN2YnR0ZD0xJmR0PVBDJm9zZj1PU1gmb3M9T3RoZXImYnI9Q2hyb21lJnJsYW5ncz1lbiZtbGFuZz0mc3ZwaWQ9MTU3MzQ3JmRpZD0mcmN4dD1PdGhlciZsYXQ9MzcuNDUwMDAxJmxvbj0tMTIyLjI2OTk5NyZ0bXBjPTIyLjExMDAwMDAwMDAwMDAxNCZkYWlkPSZ2cD0wJm9zaT0mb3N2PSZidj0xJnZ2cD0mbWs9QXBwbGUmdGVzdGlkPW11bHRpYmlkX2VuYWJsZWQmdnBiPUFjY29tcGFueWluZ0NvbnRlbnQmYz1DZzFWYm1sMFpXUWdVM1JoZEdWekVncERZV3hwWm05eWJtbGhHZ000TURjaURGSmxaSGR2YjJRZ1EybDBlVEFFT0FGSUFGQUhnQUVBaUFFQ2tBRUFzQUVBdWdFR0NLcmtDUmdLd0FITUg4QUJpeHZBQWQwR3lRR2FtWm1abVJsRlFOQUJ6Ql9nQVFEb0FRRDlBUUFBQUFDU0FpbEJaRlJvY21sMlpWOVdhV1JsYjE5RGIyeHNZWEJ6WlY5QmRYUnZjR3hoZVY5VGIzVnVaRTltWnFJQ0NERTNNem8yTURFNjJBTGNDLUFDaUE3b0FoN3dBZ0g0QWdHQUF3R0lBd0tRQXdDWUF3U2dBejI0QTZUb0JmSURBSUlFQUpvRUJ6RjZaRzlrWjNDZ0JBS29CQUN3QkFBLiZkdXI9Q2o0S0lXTm9ZWEpuWlMxdFlYaEViM1ZpYkdWV1pYSnBabmxDY21GdVpGTmhabVYwZVNJWkNPci1fX19fX19fX193RVNER1J2ZFdKc1pYWmxjbWxtZVFwRENpWmphR0Z5WjJVdFlXeHNSRzkxWW14bFZtVnlhV1o1Vm1sa1pXOVdhV1YzWVdKcGJHbDBlU0laQ09UX19fX19fX19fX3dFU0RHUnZkV0pzWlhabGNtbG1lUW9fQ2lKamFHRnlaMlV0WVd4c1JHOTFZbXhsVm1WeWFXWjVRbTkwUVhadmFXUmhibU5sSWhrSTZmN19fX19fX19fX0FSSU1aRzkxWW14bGRtVnlhV1o1Q2pvS0gyTm9ZWEpuWlMxaGJHeFJRVlpwWkdWdlEyOXRjR3hsZEdsdmJsSmhkR1VpRndpWl9fX19fX19fX184QkVncHhMV0ZzYkdsaGJtTmxDazBLTG1Ob1lYSm5aUzFoYkd4RWIzVmliR1ZXWlhKcFpubFdhV1JsYjFacFpYZGhZbWxzYVhSNVZISmhZMnRwYm1jaUd3aTRfX19fX19fX19fOEJFZ3hrZGkxeVpYQnZjblJwYm1jcUFBbzlDaUJqYUdGeVoyVXRZV3hzUTI5dGMyTnZjbVZXUTBWTlpXRnpkWEpsYldWdWRDSVpDSlBfX19fX19fX19fd0VTREdOdmJYTmpiM0psTFhaalpRLi4mY3JyZWxyPSZhZHB0PXB1Ym8mdmM9MyZzYWlkPTU4NTNCREU3LTEyMDAtNDJENy04QUNCLTZCNkRDMTEzODY3MFYmaWN0PUNlbGx1bGFyTmV0d29yazRHJmF1Y3Q9MSZ1c19wcml2YWN5PTFZTlkmaW09MSZtYz0zMTA2YzIxNC1mMDUzLTQ3ZmYtODZmZi0zZjQ1MjQ2ZWM3ZWImYWJyPTM0OTdiYTkwLWI5ZmItNDQ0ZC1hZTI1LTk1Yjg4YmY2OWY5YiZ0YWlsPTEmc3Y9cHVibWF0aWMmdGFpbD0x%26pie%3D&_api=[APIFRAMEWORKS]&_ssm=[SERVERSIDE]&gdpr=0&gdpr_consent=&gdpr_consent=[GDPRCONSENT]&_tsm=[TIMESTAMP]&_abm=[APPBUNDLE]&_pum=[PAGEURL]]]></VASTAdTagURI>\n<Error><![CDATA[https://st.pubmatic.com/track?operId=7&p=157347&s=553162&a=1961309&wa=243&ts=1721162142&wc=22918&crId=hroe2mb3&ucrid=9327911123312071756&impid=14654431-29D1-48A3-9A6F-CA18049BB00E&advertiser_id=1281339&ecpm=2.527848&mkid=25404&pbyId=28073&plmt=1&abzcid=0&gcoid=232&ch=3&er=[ERRORCODE]&pfi=1&it=5&vadFmt=8&vapi=2%2B7&sURL=suggest.com]]></Error>\n<Error><![CDATA[https://image8.pubmatic.com/AdServer/ImgSync?&fp=1&mpc=10&p=157347&gdpr=-1&gdpr_consent=&pmc=-1&gpp=DBABzw~1YNY~BVQqAAAAAgA&gpp_sid=6,7&gpmc=1&pu=https%3A%2F%2Fimage4.pubmatic.com%2FAdServer%2FSPug%3Fpmc%3D-1%26gpmc%3D1%26partnerID%3D157347%26partnerUID%3D%28null%29]]></Error>\n<Impression><![CDATA[https://st.pubmatic.com/AdServer/AdDisplayTrackerServlet?operId=1&pubId=157347&siteId=553162&adId=1961309&imprId=14654431-29D1-48A3-9A6F-CA18049BB00E&cksum=7EA24F7C175091B8&adType=13&adServerId=243&kefact=2.527848&kaxefact=2.527848&kadNetFrequecy=0&kadwidth=0&kadheight=0&kadsizeid=97&kltstamp=1721162142&indirectAdId=0&adServerOptimizerId=2&ranreq=0.1&kpbmtpfact=2.470397&dcId=1&tldId=0&passback=0&svr=BIDSV30007&adsver=_3082357945&adsabzcid=0&cls=BID&i0=0x3100000000000000&i1=0x21001100&ekefact=ntmWZpXeAQDYN6oR58DVMdB-b0DI4-dvjjAbAfudhC14erpW&ekaxefact=ntmWZp_eAQAkdrM7A2ZQnl2mc2M8_hP_vBtgsi2dzYwV-wvv&ekpbmtpfact=ntmWZqXeAQAgNDDucvo7iFcc_k9-IJnlGIoU0czktVDyo5pL&enpp=ntmWZqzeAQDAV5FPUKuIfkCB8OXWi5tTTuHURyba3nbm1wXp&pmr_m=ntmWZrbeAQCuLNjN7vtn8QJra_4TxkFxnmV8IqP0dg4VRZ5c&mdsp=ntmWZrzeAQCIywHI_Qsp4ru3psDVAT7H2HmJGMClYvlCWxIZ&pfi=1&dc=SFO2&pubBuyId=28073&crID=hroe2mb3&lpu=buchananswhisky.com&ucrid=9327911123312071756&wAdType=13&campaignId=22918&creativeId=0&pctr=0.000000&wDSPByrId=3122&wDspId=377&wbId=0&wrId=3420299&wAdvID=1281339&wDspCampId=07b85gq&isRTB=1&rtbId=5853BDE7-1200-42D7-8ACB-6B6DC1138670V&ver=24&dateHr=2024071620&usrgen=0&usryob=0&layeringebl=1&usrip=32.142.206.190&oid=14654431-29D1-48A3-9A6F-CA18049BB00E&cntryId=232&pmZoneId=alc%2Cgamv&sec=1&gpmc=1&pAuSt=3&wops=0&sURL=suggest.com&BrID=5&ulxnab=2&tpb=0]]></Impression>\n<Impression><![CDATA[https://image8.pubmatic.com/AdServer/ImgSync?&fp=1&mpc=10&p=157347&gdpr=-1&gdpr_consent=&pmc=-1&gpp=DBABzw~1YNY~BVQqAAAAAgA&gpp_sid=6,7&gpmc=1&pu=https%3A%2F%2Fimage4.pubmatic.com%2FAdServer%2FSPug%3Fpmc%3D-1%26gpmc%3D1%26partnerID%3D157347%26partnerUID%3D%28null%29]]></Impression>\n<Creatives>\n<Creative>\n<Linear>\n<TrackingEvents>\n<Tracking event="creativeView"><![CDATA[https://st.pubmatic.com/track?operId=7&p=157347&s=553162&a=1961309&wa=243&ts=1721162142&wc=22918&crId=hroe2mb3&ucrid=9327911123312071756&impid=14654431-29D1-48A3-9A6F-CA18049BB00E&advertiser_id=1281339&ecpm=2.527848&mkid=25404&pbyId=28073&plmt=1&abzcid=0&gcoid=232&ch=3&e=1]]></Tracking>\n<Tracking event="start"><![CDATA[https://st.pubmatic.com/track?operId=7&p=157347&s=553162&a=1961309&wa=243&ts=1721162142&wc=22918&crId=hroe2mb3&ucrid=9327911123312071756&impid=14654431-29D1-48A3-9A6F-CA18049BB00E&advertiser_id=1281339&ecpm=2.527848&mkid=25404&pbyId=28073&plmt=1&abzcid=0&gcoid=232&ch=3&e=2&pfi=1&vps=3&it=5&vadFmt=8&vapi=2%2B7&sURL=suggest.com]]></Tracking>\n<Tracking event="midpoint"><![CDATA[https://st.pubmatic.com/track?operId=7&p=157347&s=553162&a=1961309&wa=243&ts=1721162142&wc=22918&crId=hroe2mb3&ucrid=9327911123312071756&impid=14654431-29D1-48A3-9A6F-CA18049BB00E&advertiser_id=1281339&ecpm=2.527848&mkid=25404&pbyId=28073&plmt=1&abzcid=0&gcoid=232&ch=3&e=3&pfi=1&vps=3&sURL=suggest.com]]></Tracking>\n<Tracking event="firstQuartile"><![CDATA[https://st.pubmatic.com/track?operId=7&p=157347&s=553162&a=1961309&wa=243&ts=1721162142&wc=22918&crId=hroe2mb3&ucrid=9327911123312071756&impid=14654431-29D1-48A3-9A6F-CA18049BB00E&advertiser_id=1281339&ecpm=2.527848&mkid=25404&pbyId=28073&plmt=1&abzcid=0&gcoid=232&ch=3&e=4&pfi=1&vps=3&sURL=suggest.com]]></Tracking>\n<Tracking event="thirdQuartile"><![CDATA[https://st.pubmatic.com/track?operId=7&p=157347&s=553162&a=1961309&wa=243&ts=1721162142&wc=22918&crId=hroe2mb3&ucrid=9327911123312071756&impid=14654431-29D1-48A3-9A6F-CA18049BB00E&advertiser_id=1281339&ecpm=2.527848&mkid=25404&pbyId=28073&plmt=1&abzcid=0&gcoid=232&ch=3&e=5&pfi=1&vps=3&sURL=suggest.com]]></Tracking>\n<Tracking event="complete"><![CDATA[https://st.pubmatic.com/track?operId=7&p=157347&s=553162&a=1961309&wa=243&ts=1721162142&wc=22918&crId=hroe2mb3&ucrid=9327911123312071756&impid=14654431-29D1-48A3-9A6F-CA18049BB00E&advertiser_id=1281339&ecpm=2.527848&mkid=25404&pbyId=28073&plmt=1&abzcid=0&gcoid=232&ch=3&e=6&pfi=1&vps=3&sURL=suggest.com]]></Tracking>\n</TrackingEvents>\n<VideoClicks>\n<ClickTracking><![CDATA[https://st.pubmatic.com/track?operId=7&p=157347&s=553162&a=1961309&wa=243&ts=1721162142&wc=22918&crId=hroe2mb3&ucrid=9327911123312071756&impid=14654431-29D1-48A3-9A6F-CA18049BB00E&advertiser_id=1281339&ecpm=2.527848&mkid=25404&pbyId=28073&plmt=1&abzcid=0&gcoid=232&ch=3&e=99]]></ClickTracking>\n</VideoClicks>\n</Linear>\n</Creative>\n</Creatives>\n<Extensions>\n<Extension>\n<Meta><![CDATA[name=pm-forcepixel;ver=1.0]]></Meta>\n<Pixel loc="0">\n<Code type="1"><![CDATA[https://ads.pubmatic.com/AdServer/js/showad.js#PIX&ptask=DSP&SPug=1&fp=1&mpc=10&u=&p=157347&s=553162&d=1&cp=0&sc=1&rs=0&os=0&gdpr=-1&gdpr_consent=&gpp=DBABzw~1YNY~BVQqAAAAAgA&gpp_sid=6,7]]></Code>\n</Pixel>\n</Extension>\n</Extensions>\n</Wrapper>\n</Ad>\n</VAST>\n',
+    //     'pm_seat': '28073',
+    //     'pm_dspid': 377,
+    //     'partnerImpId': '14654431-29D1-48A3-9A6F-CA18049BB00E',
+    //     'vastXml': '<VAST version="4.0">\n<Ad id="1">\n<Wrapper>\n<AdSystem>PubMatic</AdSystem>\n<VASTAdTagURI><![CDATA[https://vast.doubleverify.com/v3/vast?_media=3&ctx=818052&cmp=DV140326&sid=TTD&plc=vidview&advid=818053&adsrv=166&dvtagver=6.1.src&aucrtv=hroe2mb3&c5=www.suggest.com&DVP_PP_IMP_ID=28007b83-1a6e-40e0-8d7f-da18f745b560&DVP_TTD_1=cbcvsmp&DVP_TTD_2=79rh74b&DVP_TTD_3=t0cb1ys&DVP_TTD_4=07b85gq&DVP_TTD_6=pubmatic&DVP_HAS_VIEW=1&_vast=https%3A%2F%2Fenduser.adsrvr.org%2Fenduser%2Fvast%2F%3Ft%3D1%26iid%3D28007b83-1a6e-40e0-8d7f-da18f745b560%26crid%3Dhroe2mb3%26wp%3D2.470397%26aid%3D1%26wpc%3DUSD%26sfe%3D18ce599e%26puid%3D%26bdc%3D10%26tdid%3D9f87f0de-ac6a-4946-97f8-22a3efc9267d%26pid%3Dcbcvsmp%26ag%3Dt0cb1ys%26adv%3D79rh74b%26sig%3D10fkHFvz_Jij-h13xr8AQFp9Ww4QwMOAOaqP0cd4d46A.%26bp%3D2.6927321177306893344628069935%26cf%3D6895051%26fq%3D0%26td_s%3Dwww.suggest.com%26rcats%3D7sp%26mste%3Dsuggest.com%26mfld%3D4%26mssi%3D%26mfsi%3D%26uhow%3D61%26agsa%3D%26rgz%3D94063%26svbttd%3D1%26dt%3DPC%26osf%3DOSX%26os%3DOther%26br%3DChrome%26rlangs%3Den%26mlang%3D%26svpid%3D157347%26did%3D%26rcxt%3DOther%26lat%3D37.450001%26lon%3D-122.269997%26tmpc%3D22.110000000000014%26daid%3D%26vp%3D0%26osi%3D%26osv%3D%26bv%3D1%26vvp%3D%26mk%3DApple%26testid%3Dmultibid_enabled%26vpb%3DAccompanyingContent%26dc%3D10%26vcc%3DCAEQHhgeMgYIAggFCAk6BAgBCAJAAUgBUASIAQKgAYAFqAHoAsgBAdABA-gBC_ABAfgBAYACA4oCEAgBCAIIAwgECAUIBggHCAiaAgQIAggHoAICqAIAwAIG2AIA4AIA9QIAAAAA%26sv%3Dpubmatic%26pidi%3D3122%26advi%3D182639%26cmpi%3D4426708%26agi%3D19460980%26cridi%3D38438288%26svi%3D12%26tid%3D1%26cmp%3D07b85gq%26act%3D1%26vrtd%3D14%2C15%26rurl%3Dhttps%253a%252f%252fwww.suggest.com%252f%26tsig%3DgczMqLwGI21SRQz-Pw1CUCbLvMUwlgTY85z_029_LVs.%26c%3DCg1Vbml0ZWQgU3RhdGVzEgpDYWxpZm9ybmlhGgM4MDciDFJlZHdvb2QgQ2l0eTAEOAFIAFAHgAEAiAECkAEAsAEAugEGCKrkCRgKwAHMH8ABixvAAd0GyQGamZmZmRlFQNABzB_gAQDoAQD9AQAAAACSAilBZFRocml2ZV9WaWRlb19Db2xsYXBzZV9BdXRvcGxheV9Tb3VuZE9mZqICCDE3Mzo2MDE62ALcC-ACiA7oAh7wAgH4AgGAAwGIAwKQAwCYAwSgAz24A6ToBfIDAIIEAJoEBzF6ZG9kZ3CgBAKoBACwBAA.%26dur%3DCj4KIWNoYXJnZS1tYXhEb3VibGVWZXJpZnlCcmFuZFNhZmV0eSIZCOr-_________wESDGRvdWJsZXZlcmlmeQpDCiZjaGFyZ2UtYWxsRG91YmxlVmVyaWZ5VmlkZW9WaWV3YWJpbGl0eSIZCOT__________wESDGRvdWJsZXZlcmlmeQo_CiJjaGFyZ2UtYWxsRG91YmxlVmVyaWZ5Qm90QXZvaWRhbmNlIhkI6f7_________ARIMZG91YmxldmVyaWZ5CjoKH2NoYXJnZS1hbGxRQVZpZGVvQ29tcGxldGlvblJhdGUiFwiZ__________8BEgpxLWFsbGlhbmNlCk0KLmNoYXJnZS1hbGxEb3VibGVWZXJpZnlWaWRlb1ZpZXdhYmlsaXR5VHJhY2tpbmciGwi4__________8BEgxkdi1yZXBvcnRpbmcqAAo9CiBjaGFyZ2UtYWxsQ29tc2NvcmVWQ0VNZWFzdXJlbWVudCIZCJP__________wESDGNvbXNjb3JlLXZjZQ..%26durs%3DmN9E03%26crrelr%3D%26adpt%3Dpubo%26vc%3D3%26said%3D5853BDE7-1200-42D7-8ACB-6B6DC1138670V%26ict%3DCellularNetwork4G%26auct%3D1%26us_privacy%3D1YNY%26im%3D1%26mc%3D3106c214-f053-47ff-86ff-3f45246ec7eb%26abr%3D3497ba90-b9fb-444d-ae25-95b88bf69f9b%26tail%3D1%26vrw%3D1&rtsurl=https%3A%2F%2Fenduser.adsrvr.org%2Fenduser%2Fdv%2F%3Frtb%3DdD0xJmlpZD0yODAwN2I4My0xYTZlLTQwZTAtOGQ3Zi1kYTE4Zjc0NWI1NjAmY3JpZD1ocm9lMm1iMyZ3cD0ke0FVQ1RJT05fUFJJQ0V9JmFpZD0xJndwYz1VU0Qmc2ZlPTE4Y2U1OTllJnB1aWQ9JmJkYz0xMCZ0ZGlkPTlmODdmMGRlLWFjNmEtNDk0Ni05N2Y4LTIyYTNlZmM5MjY3ZCZwaWQ9Y2JjdnNtcCZhZz10MGNiMXlzJmFkdj03OXJoNzRiJmJwPTIuNjkyNzMyMTE3NzMwNjg5MzM0NDYyODA2OTkzNSZjZj02ODk1MDUxJmZxPTAmdGRfcz13d3cuc3VnZ2VzdC5jb20mcmNhdHM9N3NwJm1zdGU9c3VnZ2VzdC5jb20mbWZsZD00Jm1zc2k9Jm1mc2k9JnVob3c9NjEmYWdzYT0mcmd6PTk0MDYzJnN2YnR0ZD0xJmR0PVBDJm9zZj1PU1gmb3M9T3RoZXImYnI9Q2hyb21lJnJsYW5ncz1lbiZtbGFuZz0mc3ZwaWQ9MTU3MzQ3JmRpZD0mcmN4dD1PdGhlciZsYXQ9MzcuNDUwMDAxJmxvbj0tMTIyLjI2OTk5NyZ0bXBjPTIyLjExMDAwMDAwMDAwMDAxNCZkYWlkPSZ2cD0wJm9zaT0mb3N2PSZidj0xJnZ2cD0mbWs9QXBwbGUmdGVzdGlkPW11bHRpYmlkX2VuYWJsZWQmdnBiPUFjY29tcGFueWluZ0NvbnRlbnQmYz1DZzFWYm1sMFpXUWdVM1JoZEdWekVncERZV3hwWm05eWJtbGhHZ000TURjaURGSmxaSGR2YjJRZ1EybDBlVEFFT0FGSUFGQUhnQUVBaUFFQ2tBRUFzQUVBdWdFR0NLcmtDUmdLd0FITUg4QUJpeHZBQWQwR3lRR2FtWm1abVJsRlFOQUJ6Ql9nQVFEb0FRRDlBUUFBQUFDU0FpbEJaRlJvY21sMlpWOVdhV1JsYjE5RGIyeHNZWEJ6WlY5QmRYUnZjR3hoZVY5VGIzVnVaRTltWnFJQ0NERTNNem8yTURFNjJBTGNDLUFDaUE3b0FoN3dBZ0g0QWdHQUF3R0lBd0tRQXdDWUF3U2dBejI0QTZUb0JmSURBSUlFQUpvRUJ6RjZaRzlrWjNDZ0JBS29CQUN3QkFBLiZkdXI9Q2o0S0lXTm9ZWEpuWlMxdFlYaEViM1ZpYkdWV1pYSnBabmxDY21GdVpGTmhabVYwZVNJWkNPci1fX19fX19fX193RVNER1J2ZFdKc1pYWmxjbWxtZVFwRENpWmphR0Z5WjJVdFlXeHNSRzkxWW14bFZtVnlhV1o1Vm1sa1pXOVdhV1YzWVdKcGJHbDBlU0laQ09UX19fX19fX19fX3dFU0RHUnZkV0pzWlhabGNtbG1lUW9fQ2lKamFHRnlaMlV0WVd4c1JHOTFZbXhsVm1WeWFXWjVRbTkwUVhadmFXUmhibU5sSWhrSTZmN19fX19fX19fX0FSSU1aRzkxWW14bGRtVnlhV1o1Q2pvS0gyTm9ZWEpuWlMxaGJHeFJRVlpwWkdWdlEyOXRjR3hsZEdsdmJsSmhkR1VpRndpWl9fX19fX19fX184QkVncHhMV0ZzYkdsaGJtTmxDazBLTG1Ob1lYSm5aUzFoYkd4RWIzVmliR1ZXWlhKcFpubFdhV1JsYjFacFpYZGhZbWxzYVhSNVZISmhZMnRwYm1jaUd3aTRfX19fX19fX19fOEJFZ3hrZGkxeVpYQnZjblJwYm1jcUFBbzlDaUJqYUdGeVoyVXRZV3hzUTI5dGMyTnZjbVZXUTBWTlpXRnpkWEpsYldWdWRDSVpDSlBfX19fX19fX19fd0VTREdOdmJYTmpiM0psTFhaalpRLi4mY3JyZWxyPSZhZHB0PXB1Ym8mdmM9MyZzYWlkPTU4NTNCREU3LTEyMDAtNDJENy04QUNCLTZCNkRDMTEzODY3MFYmaWN0PUNlbGx1bGFyTmV0d29yazRHJmF1Y3Q9MSZ1c19wcml2YWN5PTFZTlkmaW09MSZtYz0zMTA2YzIxNC1mMDUzLTQ3ZmYtODZmZi0zZjQ1MjQ2ZWM3ZWImYWJyPTM0OTdiYTkwLWI5ZmItNDQ0ZC1hZTI1LTk1Yjg4YmY2OWY5YiZ0YWlsPTEmc3Y9cHVibWF0aWMmdGFpbD0x%26pie%3D&_api=[APIFRAMEWORKS]&_ssm=[SERVERSIDE]&gdpr=0&gdpr_consent=&gdpr_consent=[GDPRCONSENT]&_tsm=[TIMESTAMP]&_abm=[APPBUNDLE]&_pum=[PAGEURL]]]></VASTAdTagURI>\n<Error><![CDATA[https://st.pubmatic.com/track?operId=7&p=157347&s=553162&a=1961309&wa=243&ts=1721162142&wc=22918&crId=hroe2mb3&ucrid=9327911123312071756&impid=14654431-29D1-48A3-9A6F-CA18049BB00E&advertiser_id=1281339&ecpm=2.527848&mkid=25404&pbyId=28073&plmt=1&abzcid=0&gcoid=232&ch=3&er=[ERRORCODE]&pfi=1&it=5&vadFmt=8&vapi=2%2B7&sURL=suggest.com]]></Error>\n<Error><![CDATA[https://image8.pubmatic.com/AdServer/ImgSync?&fp=1&mpc=10&p=157347&gdpr=-1&gdpr_consent=&pmc=-1&gpp=DBABzw~1YNY~BVQqAAAAAgA&gpp_sid=6,7&gpmc=1&pu=https%3A%2F%2Fimage4.pubmatic.com%2FAdServer%2FSPug%3Fpmc%3D-1%26gpmc%3D1%26partnerID%3D157347%26partnerUID%3D%28null%29]]></Error>\n<Impression><![CDATA[https://st.pubmatic.com/AdServer/AdDisplayTrackerServlet?operId=1&pubId=157347&siteId=553162&adId=1961309&imprId=14654431-29D1-48A3-9A6F-CA18049BB00E&cksum=7EA24F7C175091B8&adType=13&adServerId=243&kefact=2.527848&kaxefact=2.527848&kadNetFrequecy=0&kadwidth=0&kadheight=0&kadsizeid=97&kltstamp=1721162142&indirectAdId=0&adServerOptimizerId=2&ranreq=0.1&kpbmtpfact=2.470397&dcId=1&tldId=0&passback=0&svr=BIDSV30007&adsver=_3082357945&adsabzcid=0&cls=BID&i0=0x3100000000000000&i1=0x21001100&ekefact=ntmWZpXeAQDYN6oR58DVMdB-b0DI4-dvjjAbAfudhC14erpW&ekaxefact=ntmWZp_eAQAkdrM7A2ZQnl2mc2M8_hP_vBtgsi2dzYwV-wvv&ekpbmtpfact=ntmWZqXeAQAgNDDucvo7iFcc_k9-IJnlGIoU0czktVDyo5pL&enpp=ntmWZqzeAQDAV5FPUKuIfkCB8OXWi5tTTuHURyba3nbm1wXp&pmr_m=ntmWZrbeAQCuLNjN7vtn8QJra_4TxkFxnmV8IqP0dg4VRZ5c&mdsp=ntmWZrzeAQCIywHI_Qsp4ru3psDVAT7H2HmJGMClYvlCWxIZ&pfi=1&dc=SFO2&pubBuyId=28073&crID=hroe2mb3&lpu=buchananswhisky.com&ucrid=9327911123312071756&wAdType=13&campaignId=22918&creativeId=0&pctr=0.000000&wDSPByrId=3122&wDspId=377&wbId=0&wrId=3420299&wAdvID=1281339&wDspCampId=07b85gq&isRTB=1&rtbId=5853BDE7-1200-42D7-8ACB-6B6DC1138670V&ver=24&dateHr=2024071620&usrgen=0&usryob=0&layeringebl=1&usrip=32.142.206.190&oid=14654431-29D1-48A3-9A6F-CA18049BB00E&cntryId=232&pmZoneId=alc%2Cgamv&sec=1&gpmc=1&pAuSt=3&wops=0&sURL=suggest.com&BrID=5&ulxnab=2&tpb=0]]></Impression>\n<Impression><![CDATA[https://image8.pubmatic.com/AdServer/ImgSync?&fp=1&mpc=10&p=157347&gdpr=-1&gdpr_consent=&pmc=-1&gpp=DBABzw~1YNY~BVQqAAAAAgA&gpp_sid=6,7&gpmc=1&pu=https%3A%2F%2Fimage4.pubmatic.com%2FAdServer%2FSPug%3Fpmc%3D-1%26gpmc%3D1%26partnerID%3D157347%26partnerUID%3D%28null%29]]></Impression>\n<Creatives>\n<Creative>\n<Linear>\n<TrackingEvents>\n<Tracking event="creativeView"><![CDATA[https://st.pubmatic.com/track?operId=7&p=157347&s=553162&a=1961309&wa=243&ts=1721162142&wc=22918&crId=hroe2mb3&ucrid=9327911123312071756&impid=14654431-29D1-48A3-9A6F-CA18049BB00E&advertiser_id=1281339&ecpm=2.527848&mkid=25404&pbyId=28073&plmt=1&abzcid=0&gcoid=232&ch=3&e=1]]></Tracking>\n<Tracking event="start"><![CDATA[https://st.pubmatic.com/track?operId=7&p=157347&s=553162&a=1961309&wa=243&ts=1721162142&wc=22918&crId=hroe2mb3&ucrid=9327911123312071756&impid=14654431-29D1-48A3-9A6F-CA18049BB00E&advertiser_id=1281339&ecpm=2.527848&mkid=25404&pbyId=28073&plmt=1&abzcid=0&gcoid=232&ch=3&e=2&pfi=1&vps=3&it=5&vadFmt=8&vapi=2%2B7&sURL=suggest.com]]></Tracking>\n<Tracking event="midpoint"><![CDATA[https://st.pubmatic.com/track?operId=7&p=157347&s=553162&a=1961309&wa=243&ts=1721162142&wc=22918&crId=hroe2mb3&ucrid=9327911123312071756&impid=14654431-29D1-48A3-9A6F-CA18049BB00E&advertiser_id=1281339&ecpm=2.527848&mkid=25404&pbyId=28073&plmt=1&abzcid=0&gcoid=232&ch=3&e=3&pfi=1&vps=3&sURL=suggest.com]]></Tracking>\n<Tracking event="firstQuartile"><![CDATA[https://st.pubmatic.com/track?operId=7&p=157347&s=553162&a=1961309&wa=243&ts=1721162142&wc=22918&crId=hroe2mb3&ucrid=9327911123312071756&impid=14654431-29D1-48A3-9A6F-CA18049BB00E&advertiser_id=1281339&ecpm=2.527848&mkid=25404&pbyId=28073&plmt=1&abzcid=0&gcoid=232&ch=3&e=4&pfi=1&vps=3&sURL=suggest.com]]></Tracking>\n<Tracking event="thirdQuartile"><![CDATA[https://st.pubmatic.com/track?operId=7&p=157347&s=553162&a=1961309&wa=243&ts=1721162142&wc=22918&crId=hroe2mb3&ucrid=9327911123312071756&impid=14654431-29D1-48A3-9A6F-CA18049BB00E&advertiser_id=1281339&ecpm=2.527848&mkid=25404&pbyId=28073&plmt=1&abzcid=0&gcoid=232&ch=3&e=5&pfi=1&vps=3&sURL=suggest.com]]></Tracking>\n<Tracking event="complete"><![CDATA[https://st.pubmatic.com/track?operId=7&p=157347&s=553162&a=1961309&wa=243&ts=1721162142&wc=22918&crId=hroe2mb3&ucrid=9327911123312071756&impid=14654431-29D1-48A3-9A6F-CA18049BB00E&advertiser_id=1281339&ecpm=2.527848&mkid=25404&pbyId=28073&plmt=1&abzcid=0&gcoid=232&ch=3&e=6&pfi=1&vps=3&sURL=suggest.com]]></Tracking>\n</TrackingEvents>\n<VideoClicks>\n<ClickTracking><![CDATA[https://st.pubmatic.com/track?operId=7&p=157347&s=553162&a=1961309&wa=243&ts=1721162142&wc=22918&crId=hroe2mb3&ucrid=9327911123312071756&impid=14654431-29D1-48A3-9A6F-CA18049BB00E&advertiser_id=1281339&ecpm=2.527848&mkid=25404&pbyId=28073&plmt=1&abzcid=0&gcoid=232&ch=3&e=99]]></ClickTracking>\n</VideoClicks>\n</Linear>\n</Creative>\n</Creatives>\n<Extensions>\n<Extension>\n<Meta><![CDATA[name=pm-forcepixel;ver=1.0]]></Meta>\n<Pixel loc="0">\n<Code type="1"><![CDATA[https://ads.pubmatic.com/AdServer/js/showad.js#PIX&ptask=DSP&SPug=1&fp=1&mpc=10&u=&p=157347&s=553162&d=1&cp=0&sc=1&rs=0&os=0&gdpr=-1&gdpr_consent=&gpp=DBABzw~1YNY~BVQqAAAAAgA&gpp_sid=6,7]]></Code>\n</Pixel>\n</Extension>\n</Extensions>\n</Wrapper>\n</Ad>\n</VAST>\n',
+    //     'meta': {
+    //       'networkId': 377,
+    //       'demandSource': 377,
+    //       'dchain': {
+    //         'ver': '1.0',
+    //         'complete': 0,
+    //         'nodes': [
+    //           {
+    //             'asi': 'pubmatic.com',
+    //             'bsid': '377'
+    //           }
+    //         ]
+    //       },
+    //       'advertiserId': '28073',
+    //       'agencyId': '28073',
+    //       'buyerId': '28073',
+    //       'advertiserDomains': [
+    //         'buchananswhisky.com'
+    //       ],
+    //       'clickUrl': 'buchananswhisky.com',
+    //       'brandId': 'buchananswhisky.com'
+    //     },
+    //     'metrics': {
+    //       'userId.init.consent': [
+    //         0
+    //       ],
+    //       'userId.mod.init': [
+    //         0.699999988079071,
+    //         0.30000001192092896,
+    //         0.800000011920929,
+    //         0,
+    //         0.4000000059604645,
+    //         0.7999999821186066,
+    //         0.7000000178813934,
+    //         0.29999998211860657,
+    //         0.4000000059604645,
+    //         0.19999998807907104,
+    //         0.30000001192092896,
+    //         0.09999999403953552,
+    //         1.9000000059604645,
+    //         0.5,
+    //         0.5
+    //       ],
+    //       'userId.mods.connectId.init': [
+    //         0.699999988079071
+    //       ],
+    //       'userId.mods.criteo.init': [
+    //         0.30000001192092896
+    //       ],
+    //       'userId.mods.id5Id.init': [
+    //         0.800000011920929
+    //       ],
+    //       'userId.mods.identityLink.init': [
+    //         0
+    //       ],
+    //       'userId.mods.pairId.init': [
+    //         0.4000000059604645
+    //       ],
+    //       'userId.mods.merkleId.init': [
+    //         0.7999999821186066
+    //       ],
+    //       'userId.mods.sharedId.init': [
+    //         0.7000000178813934
+    //       ],
+    //       'userId.mods.unifiedId.init': [
+    //         0.29999998211860657
+    //       ],
+    //       'userId.mods.uid2.init': [
+    //         0.4000000059604645
+    //       ],
+    //       'userId.mods.fabrickId.init': [
+    //         0.19999998807907104
+    //       ],
+    //       'userId.mods.ftrack.init': [
+    //         0.30000001192092896
+    //       ],
+    //       'userId.mods.33acrossId.init': [
+    //         0.09999999403953552
+    //       ],
+    //       'userId.mods.liveIntentId.init': [
+    //         1.9000000059604645
+    //       ],
+    //       'userId.mods.lotamePanoramaId.init': [
+    //         0.5
+    //       ],
+    //       'userId.mods.linkedInAdsId.init': [
+    //         0.5
+    //       ],
+    //       'userId.init.modules': [
+    //         9
+    //       ],
+    //       'userId.callbacks.pending': [
+    //         0
+    //       ],
+    //       'userId.mod.callback': [
+    //         0.5,
+    //         211.7000000178814,
+    //         393.60000002384186
+    //       ],
+    //       'userId.mods.sharedId.callback': [
+    //         0.5
+    //       ],
+    //       'userId.mods.identityLink.callback': [
+    //         211.7000000178814
+    //       ],
+    //       'userId.mods.connectId.callback': [
+    //         393.60000002384186
+    //       ],
+    //       'userId.callbacks.total': [
+    //         393.80000001192093
+    //       ],
+    //       'userId.total': [
+    //         408.59999999403954
+    //       ],
+    //       'requestBids.usp': 0.09999999403953552,
+    //       'requestBids.priceFloors': 0.4000000059604645,
+    //       'requestBids.userId': 1.300000011920929,
+    //       'requestBids.rtd': 1.5,
+    //       'requestBids.validate': 0.29999998211860657,
+    //       'requestBids.makeRequests': 5.300000011920929,
+    //       'requestBids.total': 1043.5999999940395,
+    //       'requestBids.callBids': 782.5999999940395,
+    //       'adapter.client.validate': 0.09999999403953552,
+    //       'adapters.client.pubmatic.validate': 0.09999999403953552,
+    //       'adapter.client.buildRequests': 0.800000011920929,
+    //       'adapters.client.pubmatic.buildRequests': 0.800000011920929,
+    //       'adapter.client.total': 142.60000002384186,
+    //       'adapters.client.pubmatic.total': 142.60000002384186,
+    //       'adapter.client.net': 140.2000000178814,
+    //       'adapters.client.pubmatic.net': 140.2000000178814,
+    //       'adapter.client.interpretResponse': 0.29999998211860657,
+    //       'adapters.client.pubmatic.interpretResponse': 0.29999998211860657,
+    //       'addBidResponse.validate': 0,
+    //       'addBidResponse.priceFloors': 0.09999999403953552,
+    //       'addBidResponse.total': 107.5,
+    //       'render.pending': 8171.600000023842,
+    //       'render.e2e': 9215.200000017881
+    //     },
+    //     'adapterCode': 'pubmatic',
+    //     'originalCpm': 2.17,
+    //     'originalCurrency': 'USD',
+    //     'floorData': {
+    //       'floorValue': 1.25519,
+    //       'floorRule': 'www.suggest.com|video_collapse_autoplay_soundoff',
+    //       'floorRuleValue': 1.25519,
+    //       'floorCurrency': 'USD',
+    //       'cpmAfterAdjustments': 1.4914112416189786,
+    //       'enforcements': {
+    //         'enforceJS': false,
+    //         'enforcePBS': false,
+    //         'floorDeals': false,
+    //         'bidAdjustment': true,
+    //         'noFloorSignalBidders': []
+    //       },
+    //       'matchedFields': {
+    //         'domain': 'www.suggest.com',
+    //         'adUnitCode': 'video_collapse_autoplay_soundoff'
+    //       }
+    //     },
+    //     'responseTimestamp': 1721162142103,
+    //     'requestTimestamp': 1721162141961,
+    //     'bidder': 'pubmatic',
+    //     'adUnitCode': 'Video_Collapse_Autoplay_SoundOff',
+    //     'timeToRespond': 142,
+    //     'responseCpm': 2.17,
+    //     'pbLg': '1.50',
+    //     'pbMg': '1.90',
+    //     'pbHg': '1.98',
+    //     'pbAg': '1.95',
+    //     'pbDg': '1.98',
+    //     'pbCg': '1.95',
+    //     'videoCacheKey': '81d3b3be-04e7-4e78-aea6-e4f727fc3a99',
+    //     'vastUrl': 'https://prebid.adnxs.com/pbc/v1/cache?uuid=81d3b3be-04e7-4e78-aea6-e4f727fc3a99',
+    //     'size': '640x360',
+    //     'adserverTargeting': {
+    //       'hb_bidder': 'pubmatic',
+    //       'hb_adid': '120150f2ed65b49c',
+    //       'hb_pb': '1.95',
+    //       'hb_format': 'video',
+    //       'hb_adomain': 'buchananswhisky.com',
+    //       'hb_dsp': 377,
+    //       'hb_crid': 'hroe2mb3',
+    //       'hb_source': 'c',
+    //       'hb_uuid': '81d3b3be-04e7-4e78-aea6-e4f727fc3a99',
+    //       'hb_cache_id': '81d3b3be-04e7-4e78-aea6-e4f727fc3a99',
+    //       'hb_cache_host': 'prebid.adnxs.com'
+    //     },
+    //     'latestTargetedAuctionId': '99dd7761-6cf4-4402-a5a9-e56f39aae1aa',
+    //     'status': 'rendered',
+    //     'params': [
+    //       {
+    //         'publisherId': '157347',
+    //         'video': {
+    //           'mimes': [
+    //             'video/mp4',
+    //             'application/javascript',
+    //             'video/webm'
+    //           ],
+    //           'api': [
+    //             2,
+    //             7
+    //           ],
+    //           'protocols': [
+    //             1,
+    //             2,
+    //             3,
+    //             4,
+    //             5,
+    //             6,
+    //             7,
+    //             8
+    //           ],
+    //           'playbackmethod': [
+    //             6
+    //           ]
+    //         },
+    //         'adSlot': '1961309@640x360',
+    //         'pmzoneid': 'alc,gamv'
+    //       }
+    //     ]
+    //   }
+    // ];
+    // // eslint-disable-next-line no-console
+    // console.log({ bidResponses });
     return bidResponses;
   },
 
@@ -1479,6 +1782,14 @@ export const spec = {
         url: USER_SYNC_URL_IMAGE + syncurl
       }];
     }
+  },
+
+  /**
+   * Inovked by Prebid.js when it deems a bid to be billable.
+   */
+  onBidBillable: (bid) => {
+    // eslint-disable-next-line no-console
+    console.log(`Bid is billable for ${bid.adUnitCode}: `, bid);
   }
 };
 

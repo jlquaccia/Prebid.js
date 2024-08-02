@@ -31,6 +31,8 @@ export function Renderer(options) {
   this.cmd = [];
   this.push = func => {
     if (typeof func !== 'function') {
+      // // eslint-disable-next-line no-console
+      // console.log('Commands given to Renderer.push must be wrapped in a function');
       logError('Commands given to Renderer.push must be wrapped in a function');
       return;
     }
@@ -45,16 +47,22 @@ export function Renderer(options) {
 
   // use a function, not an arrow, in order to be able to pass "arguments" through
   this.render = function () {
+    // // eslint-disable-next-line no-console
+    // console.log('helllllllo');
     const renderArgs = arguments
     const runRender = () => {
       if (this._render) {
         this._render.apply(this, renderArgs)
       } else {
+        // // eslint-disable-next-line no-console
+        // console.log(`No render function was provided, please use .setRender on the renderer`);
         logWarn(`No render function was provided, please use .setRender on the renderer`);
       }
     }
 
     if (isRendererPreferredFromAdUnit(adUnitCode)) {
+      // // eslint-disable-next-line no-console
+      // console.log(`External Js not loaded by Renderer since renderer url and callback is already defined on adUnit ${adUnitCode}`);
       logWarn(`External Js not loaded by Renderer since renderer url and callback is already defined on adUnit ${adUnitCode}`);
       runRender();
     } else if (renderNow) {
@@ -65,9 +73,13 @@ export function Renderer(options) {
       loadExternalScript(url, moduleCode, this.callback, this.documentContext);
     }
   }.bind(this); // bind the function to this object to avoid 'this' errors
+  // // eslint-disable-next-line no-console
+  // console.log('Renderer created', this);
 }
 
 Renderer.install = function({ url, config, id, callback, loaded, adUnitCode, renderNow }) {
+  // // eslint-disable-next-line no-console
+  // console.log('rendererInstall called', { url, config, id, callback, loaded, adUnitCode, renderNow });
   return new Renderer({ url, config, id, callback, loaded, adUnitCode, renderNow });
 };
 
@@ -76,6 +88,8 @@ Renderer.prototype.getConfig = function() {
 };
 
 Renderer.prototype.setRender = function(fn) {
+  // // eslint-disable-next-line no-console
+  // console.log('setRenderer called', fn);
   this._render = fn;
 };
 

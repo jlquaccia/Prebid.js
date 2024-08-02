@@ -29,6 +29,8 @@ export const getBidToRender = hook('sync', function (adId, forRender = true, ove
 })
 
 export const markWinningBid = hook('sync', function (bid) {
+  // eslint-disable-next-line no-console
+  console.log('markWinningBid', bid);
   events.emit(BID_WON, bid);
   auctionManager.addWinningBid(bid);
 })

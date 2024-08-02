@@ -35,6 +35,9 @@ export function isValidVideoBid(bid, {index = auctionManager.index} = {}) {
   const useCacheKey = videoMediaType && deepAccess(videoMediaType, 'useCacheKey');
   const adUnit = index.getAdUnit(bid);
 
+  // // eslint-disable-next-line no-console
+  // console.log({ bid, videoMediaType, context, adUnit, useCacheKey });
+
   // if context not defined assume default 'instream' for video bids
   // instream bids require a vast url or vast xml content
   return checkVideoBidSetup(bid, adUnit, videoMediaType, context, useCacheKey);
@@ -44,6 +47,11 @@ export const checkVideoBidSetup = hook('sync', function(bid, adUnit, videoMediaT
   if (videoMediaType && (useCacheKey || context !== OUTSTREAM)) {
     // xml-only video bids require a prebid cache url
     if (!config.getConfig('cache.url') && bid.vastXml && !bid.vastUrl) {
+      // // eslint-disable-next-line no-console
+      // console.log(`
+      //   This bid contains only vastXml and will not work when a prebid cache url is not specified.
+      //   Try enabling prebid cache with $$PREBID_GLOBAL$$.setConfig({ cache: {url: "..."} });
+      // `);
       logError(`
         This bid contains only vastXml and will not work when a prebid cache url is not specified.
         Try enabling prebid cache with $$PREBID_GLOBAL$$.setConfig({ cache: {url: "..."} });

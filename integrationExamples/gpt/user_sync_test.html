@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prebid.js Demo with PubMatic</title>
+  <style>
+    #ad-slot {
+      width: 300px;
+      height: 250px;
+      border: 1px solid #000;
+      margin: 20px auto;
+    }
+  </style>
+</head>
+<body>
+  <script src="../../build/dev/prebid.js"></script>
+  <script src="https://www.googletagservices.com/tag/js/gpt.js"></script>
+  <script>
+    var adUnits = [{
+      code: 'ad-slot',
+      mediaTypes: {
+        banner: {
+          sizes: [[300, 250]]
+        }
+      },
+      bids: [{
+        bidder: 'pubmatic',
+        params: {
+          publisherId: '156276',
+          adSlot: 'pubmatic_test'
+        }
+      }]
+    }];
+
+    var pbjs = pbjs || {};
+    pbjs.que = pbjs.que || [];
+
+    pbjs.que.push(function() {
+      pbjs.addAdUnits(adUnits);
+
+      pbjs.setConfig({
+        // userSync: {
+        //   iframeEnabled: true,
+        //   pixelEnabled: true,
+        //   syncsPerBidder: 5,
+        //   syncDelay: 3000,
+        //   userIds: [{
+        //     name: 'pubCommonId',
+        //     params: {
+        //       pixelUrl: 'https://example.com/user-sync'
+        //     },
+        //     storage: {
+        //       type: 'cookie',
+        //       name: 'pubcid',
+        //       expires: 30
+        //     }
+        //   }]
+        // }
+        userSync: {
+          filterSettings: {
+            iframe: {
+              bidders: '*',      // '*' represents all bidders
+              filter: 'include'
+            }
+          }
+        }
+      });
+
+      pbjs.requestBids({
+        bidsBackHandler: function(bidResponses) {
+          pbjs.setTargetingForGPTAsync();
+          googletag.pubads().refresh();
+        }
+      });
+    });
+
+    var googletag = googletag || {};
+    googletag.cmd = googletag.cmd || [];
+
+    googletag.cmd.push(function() {
+      googletag.defineSlot('/12345678/ad-slot', [300, 250], 'ad-slot').addService(googletag.pubads());
+      googletag.pubads().disableInitialLoad();
+      googletag.enableServices();
+
+      // googletag.defineSlot('/19968336/header-bid-tag-0', [[300, 250]], 'test-banner-ad').addService(googletag.pubads());
+      // googletag.pubads().disableInitialLoad();
+      // googletag.enableServices();
+    });
+  </script>
+  <div id="ad-slot">
+    <script>
+      googletag.cmd.push(function () {
+        googletag.display('ad-slot');
+      });
+    </script>
+  </div>
+</body>
+</html>

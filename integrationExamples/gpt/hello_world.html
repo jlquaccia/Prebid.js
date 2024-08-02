@@ -10,86 +10,724 @@
 <html>
 
 <head>
-    <script async src="../../build/dev/prebid.js"></script>
-    <script async src="https://www.googletagservices.com/tag/js/gpt.js"></script>
-    <script>
-        var FAILSAFE_TIMEOUT = 3300;
-        var PREBID_TIMEOUT = 1000;
+  <script async src="../../build/dev/prebid.js"></script>
+  <script async src="https://www.googletagservices.com/tag/js/gpt.js"></script>
+  <script>
+    var FAILSAFE_TIMEOUT = 3300;
+    var PREBID_TIMEOUT = 1000;
 
-        var adUnits = [{
-            code: 'div-gpt-ad-1460505748561-0',
-            mediaTypes: {
-                banner: {
-                    sizes: [[300, 250]],
-                }
-            },
+    var adUnits = [
+      {
+        code: 'div-1',
+        mediaTypes: {
+          banner: {
+            sizes: [[300, 250]],
+          }
+        },
+        bids: [{
+          bidder: 'pubmatic',
+          params: {
+            publisherId: '156276',
+            adSlot: 'pubmatic_test'
+          }
+        }]
+      }
+      // {
+      //   "code": "Video_Collapse_Autoplay_SoundOff",
+      //   "ortb2Imp": {
+      //     "ext": {
+      //       "data": {
+      //         "adserver": {
+      //           "name": "gam",
+      //           "adslot": "/18190176,21817067566/AdThrive_Video_Collapse_Autoplay_SoundOff/65c255acbd51b957b08907b7"
+      //         },
+      //         "jwTargeting": {
+      //           "playerID": "QxuQfJhU"
+      //         }
+      //       },
+      //       "ae": 1
+      //     }
+      //   },
+      //   "mediaTypes": {
+      //     "video": {
+      //       "context": "outstream",
+      //       "playerSize": [
+      //         640,
+      //         480
+      //       ],
+      //       "mimes": [
+      //         "video/mp4",
+      //         "application/javascript",
+      //         "video/webm"
+      //       ],
+      //       "protocols": [
+      //         1,
+      //         2,
+      //         3,
+      //         4,
+      //         5,
+      //         6,
+      //         7,
+      //         8
+      //       ],
+      //       "plcmt": 2,
+      //       "maxduration": 30,
+      //       "playbackmethod": [
+      //         6
+      //       ],
+      //       "playbackend": 3,
+      //       "linearity": 1,
+      //       "api": [
+      //         2,
+      //         7
+      //       ],
+      //       "w": 640,
+      //       "h": 480,
+      //       "pos": 1,
+      //       "minduration": 1,
+      //       "startdelay": 0,
+      //       "placement": 1,
+      //       "skip": 0
+      //     }
+      //   },
+      //   "bids": [
+      //     {
+      //       "bidder": "pubmatic",
+      //       "params": {
+      //         "publisherId": "157347",
+      //         // "video": {
+      //         //   "context": "outstream",
+      //         //   "mimes": [
+      //         //     "video/mp4",
+      //         //     "application/javascript",
+      //         //     "video/webm"
+      //         //   ],
+      //         //   "api": [
+      //         //     2,
+      //         //     7
+      //         //   ],
+      //         //   "protocols": [
+      //         //     1,
+      //         //     2,
+      //         //     3,
+      //         //     4,
+      //         //     5,
+      //         //     6,
+      //         //     7,
+      //         //     8
+      //         //   ],
+      //         //   "playbackmethod": [
+      //         //     6
+      //         //   ]
+      //         // },
+      //         "adSlot": "1961309@640x360",
+      //         "pmzoneid": "alc,gamv",
+      //         "outstreamAU": 'pubmatic_ibv_test',
+      //       },
+      //       "auctionId": "a6fc1f10-bb1d-4a66-bfc4-ffb4f7b98291",
+      //       "floorData": {
+      //         "noFloorSignaled": false,
+      //         "skipped": false,
+      //         "skipRate": 0,
+      //         "modelVersion": "legacy",
+      //         "modelWeight": 100,
+      //         "location": "setConfig",
+      //         "floorProvider": "legacy"
+      //       },
+      //       "userId": {
+      //         "criteoId": "WanQc19zUXNHZmJhTExySHZUQ0tXSVMxQWFDMUpWNm1xWnRoTTNNMGtwakdTQURQMGZQeEs4ZWdOaVNZd3BCcGE5N3dRQ29BQjgwNDlnVGtIcW9jc2VkMSUyQkVLSWJlUzhpS1puZ0tnc0llV1BhbmhBJTNE",
+      //         "id5id": {
+      //           "uid": "ID5*IDai7-4QAzB4YCiOefSeanVDF40oIeyLtuHagzABiw6xnh9aF067o2vZ1qb03pLh",
+      //           "ext": {
+      //             "linkType": 1,
+      //             "pba": "aHOyzlfUoNLSClBFAXBmfKfjp2sTVKag7InrWPsSUZY="
+      //           }
+      //         },
+      //         "merkleId": [],
+      //         "pubcid": "844ce09f-dfb8-4564-b57f-eba8940b5149",
+      //         "tdid": "c9d3e406-2540-49b7-b72c-f9ebfe018345",
+      //         "fabrickId": "E1:PXO9HDKdx1rO-FjO890xkxMbcwZXy_7jtVBWDagBG8cBiN9jum4oQyQWLb9CaoRCjuG2HWxrqdVHlb4774Y4ow8a6wUT5OMEEfM65GcUpoyoVmVF_azlUJHEycJ-V4b2",
+      //         "ftrackId": {
+      //           "uid": "feae80f1e5334e2b80be45cb563a10c3",
+      //           "ext": {
+      //             "HHID": "554f2781264242cb84f8b8a6b7295593",
+      //             "DeviceID": "feae80f1e5334e2b80be45cb563a10c3",
+      //             "SingleDeviceID": "feae80f1e5334e2b80be45cb563a10c3"
+      //           }
+      //         },
+      //         "33acrossId": {
+      //           "envelope": "v1.0013300001i0fyfAAA.1031.ogtn/uhyh+/P/ILSq3N+Kj3cCmFv3yMGRg7gZCU665vEyUdSYhzURXPfi2K6pnGG2SzXqniYEUSPO3fCPetlV0NpUpjMZeDLf75sBb1U1B6ElDWxP+DJCSZ23lmwtPUWeUA7iFiYa6uYxFE1+7JAXa1UgnQ3Jkvrkd9noUkpK46kMuW+4HmT4hazUrRgUKygg/CPzV/8BlJG+on/DLvJEpEoBpVKI7Ezt69ObOWxJ0DhnZouZ+R9q9GwPTR5azPYysVLpUQcH+q67a/LEg25kIEaQ2rWx5hGyY9pcopqhRbkKsYpvw74NkdUE+9fKmLi0tbzPFBzX94DKr8o329/RfaX0pUiJM69CMBwB61z2xcdzEWbSsP3dsVKeRpsHOcYZ+aw9x+jlpKoSjv9TwhzyoKIif1feVvBwsSrsWm290EdVDkn12Ho+q3eYBNGpRDwDl1M8tHWIqVsF1bJLz2SedihjIRENDt45WP0xq+ylpBt6pl8a6vCVsmYLfwxgAi2PjmcICoj4XsaW6bqxBwptMRxOeTAVs478wr8R5NNzJ/MSmI36PNfJPeWrtQTWTCdu7YsDU33prOjXndI5eufiMioJrOOErQ8L6IFsCDsWFKGI4gBp1pyfLepyeBoEPx7/66h+B4i6dKjqK2Vxen7r6xhISVVHIFpNkT3i8zdo6q45EunOLZdUfy2ejpKH5d/81vESH4Fs43t7x7kJeQEnL5aX4P9rx6w+mIUASVSiVrk5FfvHGYWNnSmQrLxN2Asdoa9ZRtrThT1+wEl1Dh84jjbBUi6cDAGy5VMHSw1rd6me9vlTo7aahecfBilpUgvzTaLNt2LolaXzeZyGdADUALmAZh/OTogwMR0yMgJSrKq+leTKZt7jQG9aTRY1CcQ5pw98VxtxIX5WwHSTES09gtLGOZbzBYJS90/bQLr0T940dcvUK/ibDPtgZ7CGjJTb5Gu5SdrZQVPc0AayVVO0aTp/IeELX1kLYa3QIAkaSpzXqpQltYafnlfTK4mvx/1X5eVkx8vTb2KzCuMyV5dmFYBn6Nu33/x0bKIN91WC47Kf9ozxUNIrSWz7yyfgJvweQgBB0C9SoGtttRG8n5HPp/JcLHv+6uXtrp7EHDzqP0uKG6KWaBHjWjq4idAfd18WpPoEad2AxrYwQA+xqIsdQ9ze/682IgPs/fZxZt2P2u2Jx1UvBwhdTnQcJDt6K0/xpeeIUjQuQ/N1pMlKIxAxzwKHJAyn8h6fsDjhUox3xSi8wQcaS0Ko4K49roBTU4KWJOEaZS+kuxnYyzbBRjQZni+um1YeAjFTCc/Hmhf99MKzkYUpu645dxWpUlcuTFc0pkLg57NsKOI3FgMC8VhJGGX52sJ3cKUQDIGC5ilEeaOZF893C6AyF3t3Qb9tYllQ5wzLXm7Fa+WIXYZB16AxLQ5zj+jc/1+ICHHpYHT76opZyA4GDT0S+r4hGT20aAT4IYo3biHi4gNlmQcYqOgsbtXkQawXy5omGM0roZrEC4yw2ANaW7jag+OIdEpvW/2OH6R7qsRptYf/KxMbpZzaX7svJAJKEMVK4mDGnKicW2HF+OeqONeFTDmkmKOp28xlzODQbzWopQv58fLFWV9R6JfeHBM7rJMWxLRf3db4laDcX2ZI+9r2SoZGTTWnrTztgS5Wj56l8YfxnB0IRo2CYszhv06AMBY1FrIEHKwARXrxmQJb7EGjDTgfz86kmTRotSheRMj64inLrWOGZsY/O0eX7I8q2XNVXzE2eubKJYsoosrFfXxcw5PYjpEDQEQcaxyo9cGLpSUO7bxiG5HTmllf8iZbwG296jYN5VuZSZKGOXljzccsOqBQTkSE0A2NhLIhWwPsDB2hRY9yogDaRNffr9oKYOWuoUKiHJ1/QqDho3M8nw1YhZ3IbUJpKa4iEy55I79AcAnmYPATOXaww=="
+      //         },
+      //         "lipb": {
+      //           "nonId": "4-PBsKNOXSoShTDfqSnB+f+mt32CrTaol+OF7P3UV6884TJ0sjlcgWwKp+kxJXCtCKWk04LHIMFFTbeWF0jWGng49ALeAXdbA4tfEo4/inbytwSg==",
+      //           "bidswitch": "a9302ca1-47aa-41a3-98d5-a5d9a2084e58",
+      //           "openx": "76827083-235a-0e92-03bf-0ee7a75de861",
+      //           "magnite": "LGPLVBHD-F-1DVF",
+      //           "sovrn": "IexNAPZHvHqyLYyiTUSxJoO8",
+      //           "pubmatic": "686AA2F8-E578-4C00-AC3E-4326BFEA47B1",
+      //           "index": "ZEGnnmZp-fMusvfjVt7ImwAA&589",
+      //           "lipbid": "4-PBsKNOXSoShTDfqSnB+f+mt32CrTaol+OF7P3UV6884TJ0sjlcgWwKp+kxJXCtCKWk04LHIMFFTbeWF0jWGng49ALeAXdbA4tfEo4/inbytwSg=="
+      //         },
+      //         "bidswitch": {
+      //           "id": "a9302ca1-47aa-41a3-98d5-a5d9a2084e58",
+      //           "ext": {
+      //             "provider": "liveintent.com"
+      //           }
+      //         },
+      //         "magnite": {
+      //           "id": "LGPLVBHD-F-1DVF",
+      //           "ext": {
+      //             "provider": "liveintent.com"
+      //           }
+      //         },
+      //         "index": {
+      //           "id": "ZEGnnmZp-fMusvfjVt7ImwAA&589",
+      //           "ext": {
+      //             "provider": "liveintent.com"
+      //           }
+      //         },
+      //         "openx": {
+      //           "id": "76827083-235a-0e92-03bf-0ee7a75de861",
+      //           "ext": {
+      //             "provider": "liveintent.com"
+      //           }
+      //         },
+      //         "pubmatic": {
+      //           "id": "686AA2F8-E578-4C00-AC3E-4326BFEA47B1",
+      //           "ext": {
+      //             "provider": "liveintent.com"
+      //           }
+      //         },
+      //         "sovrn": {
+      //           "id": "IexNAPZHvHqyLYyiTUSxJoO8",
+      //           "ext": {
+      //             "provider": "liveintent.com"
+      //           }
+      //         },
+      //         "lotamePanoramaId": "b504fcca6a74942198d2cbffa8cf185ca02c41bf93721f469a64adf65571a971",
+      //         "linkedInAdsId": {
+      //           "li_adsId": "5b6c662a-14d9-4a91-a9d4-54f415556905",
+      //           "ext": {
+      //             "li_fat": null,
+      //             "li_giant": null
+      //           }
+      //         }
+      //       },
+      //       "userIdAsEids": [
+      //         {
+      //           "source": "criteo.com",
+      //           "uids": [
+      //             {
+      //               "id": "WanQc19zUXNHZmJhTExySHZUQ0tXSVMxQWFDMUpWNm1xWnRoTTNNMGtwakdTQURQMGZQeEs4ZWdOaVNZd3BCcGE5N3dRQ29BQjgwNDlnVGtIcW9jc2VkMSUyQkVLSWJlUzhpS1puZ0tnc0llV1BhbmhBJTNE",
+      //               "atype": 1
+      //             }
+      //           ]
+      //         },
+      //         {
+      //           "source": "id5-sync.com",
+      //           "uids": [
+      //             {
+      //               "id": "ID5*IDai7-4QAzB4YCiOefSeanVDF40oIeyLtuHagzABiw6xnh9aF067o2vZ1qb03pLh",
+      //               "atype": 1,
+      //               "ext": {
+      //                 "linkType": 1,
+      //                 "pba": "aHOyzlfUoNLSClBFAXBmfKfjp2sTVKag7InrWPsSUZY="
+      //               }
+      //             }
+      //           ]
+      //         },
+      //         {
+      //           "source": "pubcid.org",
+      //           "uids": [
+      //             {
+      //               "id": "844ce09f-dfb8-4564-b57f-eba8940b5149",
+      //               "atype": 1
+      //             }
+      //           ]
+      //         },
+      //         {
+      //           "source": "adserver.org",
+      //           "uids": [
+      //             {
+      //               "id": "c9d3e406-2540-49b7-b72c-f9ebfe018345",
+      //               "atype": 1,
+      //               "ext": {
+      //                 "rtiPartner": "TDID"
+      //               }
+      //             }
+      //           ]
+      //         },
+      //         {
+      //           "source": "neustar.biz",
+      //           "uids": [
+      //             {
+      //               "id": "E1:PXO9HDKdx1rO-FjO890xkxMbcwZXy_7jtVBWDagBG8cBiN9jum4oQyQWLb9CaoRCjuG2HWxrqdVHlb4774Y4ow8a6wUT5OMEEfM65GcUpoyoVmVF_azlUJHEycJ-V4b2",
+      //               "atype": 1
+      //             }
+      //           ]
+      //         },
+      //         {
+      //           "source": "flashtalking.com",
+      //           "uids": [
+      //             {
+      //               "id": "feae80f1e5334e2b80be45cb563a10c3",
+      //               "atype": 1,
+      //               "ext": {
+      //                 "HHID": "554f2781264242cb84f8b8a6b7295593",
+      //                 "DeviceID": "feae80f1e5334e2b80be45cb563a10c3",
+      //                 "SingleDeviceID": "feae80f1e5334e2b80be45cb563a10c3"
+      //               }
+      //             }
+      //           ]
+      //         },
+      //         {
+      //           "source": "33across.com",
+      //           "uids": [
+      //             {
+      //               "id": "v1.0013300001i0fyfAAA.1031.ogtn/uhyh+/P/ILSq3N+Kj3cCmFv3yMGRg7gZCU665vEyUdSYhzURXPfi2K6pnGG2SzXqniYEUSPO3fCPetlV0NpUpjMZeDLf75sBb1U1B6ElDWxP+DJCSZ23lmwtPUWeUA7iFiYa6uYxFE1+7JAXa1UgnQ3Jkvrkd9noUkpK46kMuW+4HmT4hazUrRgUKygg/CPzV/8BlJG+on/DLvJEpEoBpVKI7Ezt69ObOWxJ0DhnZouZ+R9q9GwPTR5azPYysVLpUQcH+q67a/LEg25kIEaQ2rWx5hGyY9pcopqhRbkKsYpvw74NkdUE+9fKmLi0tbzPFBzX94DKr8o329/RfaX0pUiJM69CMBwB61z2xcdzEWbSsP3dsVKeRpsHOcYZ+aw9x+jlpKoSjv9TwhzyoKIif1feVvBwsSrsWm290EdVDkn12Ho+q3eYBNGpRDwDl1M8tHWIqVsF1bJLz2SedihjIRENDt45WP0xq+ylpBt6pl8a6vCVsmYLfwxgAi2PjmcICoj4XsaW6bqxBwptMRxOeTAVs478wr8R5NNzJ/MSmI36PNfJPeWrtQTWTCdu7YsDU33prOjXndI5eufiMioJrOOErQ8L6IFsCDsWFKGI4gBp1pyfLepyeBoEPx7/66h+B4i6dKjqK2Vxen7r6xhISVVHIFpNkT3i8zdo6q45EunOLZdUfy2ejpKH5d/81vESH4Fs43t7x7kJeQEnL5aX4P9rx6w+mIUASVSiVrk5FfvHGYWNnSmQrLxN2Asdoa9ZRtrThT1+wEl1Dh84jjbBUi6cDAGy5VMHSw1rd6me9vlTo7aahecfBilpUgvzTaLNt2LolaXzeZyGdADUALmAZh/OTogwMR0yMgJSrKq+leTKZt7jQG9aTRY1CcQ5pw98VxtxIX5WwHSTES09gtLGOZbzBYJS90/bQLr0T940dcvUK/ibDPtgZ7CGjJTb5Gu5SdrZQVPc0AayVVO0aTp/IeELX1kLYa3QIAkaSpzXqpQltYafnlfTK4mvx/1X5eVkx8vTb2KzCuMyV5dmFYBn6Nu33/x0bKIN91WC47Kf9ozxUNIrSWz7yyfgJvweQgBB0C9SoGtttRG8n5HPp/JcLHv+6uXtrp7EHDzqP0uKG6KWaBHjWjq4idAfd18WpPoEad2AxrYwQA+xqIsdQ9ze/682IgPs/fZxZt2P2u2Jx1UvBwhdTnQcJDt6K0/xpeeIUjQuQ/N1pMlKIxAxzwKHJAyn8h6fsDjhUox3xSi8wQcaS0Ko4K49roBTU4KWJOEaZS+kuxnYyzbBRjQZni+um1YeAjFTCc/Hmhf99MKzkYUpu645dxWpUlcuTFc0pkLg57NsKOI3FgMC8VhJGGX52sJ3cKUQDIGC5ilEeaOZF893C6AyF3t3Qb9tYllQ5wzLXm7Fa+WIXYZB16AxLQ5zj+jc/1+ICHHpYHT76opZyA4GDT0S+r4hGT20aAT4IYo3biHi4gNlmQcYqOgsbtXkQawXy5omGM0roZrEC4yw2ANaW7jag+OIdEpvW/2OH6R7qsRptYf/KxMbpZzaX7svJAJKEMVK4mDGnKicW2HF+OeqONeFTDmkmKOp28xlzODQbzWopQv58fLFWV9R6JfeHBM7rJMWxLRf3db4laDcX2ZI+9r2SoZGTTWnrTztgS5Wj56l8YfxnB0IRo2CYszhv06AMBY1FrIEHKwARXrxmQJb7EGjDTgfz86kmTRotSheRMj64inLrWOGZsY/O0eX7I8q2XNVXzE2eubKJYsoosrFfXxcw5PYjpEDQEQcaxyo9cGLpSUO7bxiG5HTmllf8iZbwG296jYN5VuZSZKGOXljzccsOqBQTkSE0A2NhLIhWwPsDB2hRY9yogDaRNffr9oKYOWuoUKiHJ1/QqDho3M8nw1YhZ3IbUJpKa4iEy55I79AcAnmYPATOXaww==",
+      //               "atype": 1
+      //             }
+      //           ]
+      //         },
+      //         {
+      //           "source": "liveintent.com",
+      //           "uids": [
+      //             {
+      //               "id": "4-PBsKNOXSoShTDfqSnB+f+mt32CrTaol+OF7P3UV6884TJ0sjlcgWwKp+kxJXCtCKWk04LHIMFFTbeWF0jWGng49ALeAXdbA4tfEo4/inbytwSg==",
+      //               "atype": 3
+      //             }
+      //           ]
+      //         },
+      //         {
+      //           "source": "bidswitch.net",
+      //           "uids": [
+      //             {
+      //               "id": "a9302ca1-47aa-41a3-98d5-a5d9a2084e58",
+      //               "atype": 3,
+      //               "ext": {
+      //                 "provider": "liveintent.com"
+      //               }
+      //             }
+      //           ]
+      //         },
+      //         {
+      //           "source": "rubiconproject.com",
+      //           "uids": [
+      //             {
+      //               "id": "LGPLVBHD-F-1DVF",
+      //               "atype": 3,
+      //               "ext": {
+      //                 "provider": "liveintent.com"
+      //               }
+      //             }
+      //           ]
+      //         },
+      //         {
+      //           "source": "liveintent.indexexchange.com",
+      //           "uids": [
+      //             {
+      //               "id": "ZEGnnmZp-fMusvfjVt7ImwAA&589",
+      //               "atype": 3,
+      //               "ext": {
+      //                 "provider": "liveintent.com"
+      //               }
+      //             }
+      //           ]
+      //         },
+      //         {
+      //           "source": "openx.net",
+      //           "uids": [
+      //             {
+      //               "id": "76827083-235a-0e92-03bf-0ee7a75de861",
+      //               "atype": 3,
+      //               "ext": {
+      //                 "provider": "liveintent.com"
+      //               }
+      //             }
+      //           ]
+      //         },
+      //         {
+      //           "source": "pubmatic.com",
+      //           "uids": [
+      //             {
+      //               "id": "686AA2F8-E578-4C00-AC3E-4326BFEA47B1",
+      //               "atype": 3,
+      //               "ext": {
+      //                 "provider": "liveintent.com"
+      //               }
+      //             }
+      //           ]
+      //         },
+      //         {
+      //           "source": "liveintent.sovrn.com",
+      //           "uids": [
+      //             {
+      //               "id": "IexNAPZHvHqyLYyiTUSxJoO8",
+      //               "atype": 3,
+      //               "ext": {
+      //                 "provider": "liveintent.com"
+      //               }
+      //             }
+      //           ]
+      //         },
+      //         {
+      //           "source": "crwdcntrl.net",
+      //           "uids": [
+      //             {
+      //               "id": "b504fcca6a74942198d2cbffa8cf185ca02c41bf93721f469a64adf65571a971",
+      //               "atype": 1
+      //             }
+      //           ]
+      //         },
+      //         {
+      //           "source": "linkedin.com",
+      //           "uids": [
+      //             {
+      //               "id": "5b6c662a-14d9-4a91-a9d4-54f415556905",
+      //               "atype": 1,
+      //               "ext": {
+      //                 "li_fat": null,
+      //                 "li_giant": null
+      //               }
+      //             }
+      //           ]
+      //         }
+      //       ],
+      //       "rtd": {
+      //         "jwplayer": {
+      //           "targeting": {
+      //             "segments": [
+      //               "80000020",
+      //               "80000030",
+      //               "80000040",
+      //               "80000050",
+      //               "80000060",
+      //               "80000065",
+      //               "80000070",
+      //               "80000075",
+      //               "80000080",
+      //               "80000085",
+      //               "80011026",
+      //               "80011079",
+      //               "80011080",
+      //               "80011081",
+      //               "80011082",
+      //               "90000020",
+      //               "90000030",
+      //               "90000040",
+      //               "90000050",
+      //               "90000060",
+      //               "90000065",
+      //               "CMTPI-03654CCA",
+      //               "CMTPI-03E78741",
+      //               "CMTPI-04AC8D43",
+      //               "CMTPI-0653140B",
+      //               "CMTPI-0677E447",
+      //               "CMTPI-09062B79",
+      //               "CMTPI-0C481B6E",
+      //               "CMTPI-0C58A459",
+      //               "CMTPI-0E02F6C6",
+      //               "CMTPI-0E61D917",
+      //               "CMTPI-0F8628E7",
+      //               "CMTPI-10231370",
+      //               "CMTPI-1081A780",
+      //               "CMTPI-1125FE17",
+      //               "CMTPI-1446F98C",
+      //               "CMTPI-1491B5F7",
+      //               "CMTPI-1801D437",
+      //               "CMTPI-18220805",
+      //               "CMTPI-196D4100",
+      //               "CMTPI-1B3D7E56",
+      //               "CMTPI-1BA500B4",
+      //               "CMTPI-1C1AF9F6",
+      //               "CMTPI-1F0E45F0",
+      //               "CMTPI-22F53174",
+      //               "CMTPI-252C803E",
+      //               "CMTPI-25872F6D",
+      //               "CMTPI-2623EBD0",
+      //               "CMTPI-26C3D89C",
+      //               "CMTPI-290912EC",
+      //               "CMTPI-2921FAA9",
+      //               "CMTPI-298C1144",
+      //               "CMTPI-29BFFEE3",
+      //               "CMTPI-2BEB6E32",
+      //               "CMTPI-2CB853D8",
+      //               "CMTPI-2CCA8B62",
+      //               "CMTPI-2D595AD4",
+      //               "CMTPI-30023807",
+      //               "CMTPI-3212357F",
+      //               "CMTPI-323B8BC4",
+      //               "CMTPI-32DFB148",
+      //               "CMTPI-32EEF776",
+      //               "CMTPI-346DDCE9",
+      //               "CMTPI-35B05EC0",
+      //               "CMTPI-379409FE",
+      //               "CMTPI-3A67EB40",
+      //               "CMTPI-3C3D93D3",
+      //               "CMTPI-3D222CA4",
+      //               "CMTPI-3DA3AC71",
+      //               "CMTPI-3E98040D",
+      //               "CMTPI-40FDC4C8",
+      //               "CMTPI-414CCB4C",
+      //               "CMTPI-427DB077",
+      //               "CMTPI-434208A3",
+      //               "CMTPI-43ECA79C",
+      //               "CMTPI-456B9861",
+      //               "CMTPI-45928D6D",
+      //               "CMTPI-4AF72AB1",
+      //               "CMTPI-4B29A4E4",
+      //               "CMTPI-4B4B1C97",
+      //               "CMTPI-4C62EB9D",
+      //               "CMTPI-4C74FA64",
+      //               "CMTPI-4D1CA54D",
+      //               "CMTPI-51202BAF",
+      //               "CMTPI-51E0EBA7",
+      //               "CMTPI-528032CA",
+      //               "CMTPI-52C92089",
+      //               "CMTPI-53BB7152",
+      //               "CMTPI-56CA7E73",
+      //               "CMTPI-59A96550",
+      //               "CMTPI-59B389C1",
+      //               "CMTPI-5A1B5557",
+      //               "CMTPI-5B7FCF5F",
+      //               "CMTPI-5C08D349",
+      //               "CMTPI-5CDA7645",
+      //               "CMTPI-5D1B7ADE",
+      //               "CMTPI-5E59A0FD",
+      //               "CMTPI-5FC5D6BC",
+      //               "CMTPI-601C3EF5",
+      //               "CMTPI-60F11E76",
+      //               "CMTPI-61B818C9",
+      //               "CMTPI-62A5896D",
+      //               "CMTPI-63CC7C48",
+      //               "CMTPI-65B70340",
+      //               "CMTPI-66C7395B",
+      //               "CMTPI-678AF64F",
+      //               "CMTPI-688AEC9E",
+      //               "CMTPI-691F63A9",
+      //               "CMTPI-69471949",
+      //               "CMTPI-695D9689",
+      //               "CMTPI-697B8462",
+      //               "CMTPI-699C95BA",
+      //               "CMTPI-6A4B20D0",
+      //               "CMTPI-6AB65898",
+      //               "CMTPI-6B3B5860",
+      //               "CMTPI-6BD69788",
+      //               "CMTPI-6EA7EE3C",
+      //               "CMTPI-717A3D56",
+      //               "CMTPI-722848A5",
+      //               "CMTPI-7263294A",
+      //               "CMTPI-726A9CDE",
+      //               "CMTPI-72820CEF",
+      //               "CMTPI-738E0D14",
+      //               "CMTPI-740E0FB8",
+      //               "CMTPI-7668412F",
+      //               "CMTPI-76BC4405",
+      //               "CMTPI-773EE932",
+      //               "CMTPI-7771E5AA",
+      //               "CMTPI-78B1D591",
+      //               "CMTPI-78DEF36A",
+      //               "CMTPI-7BD399CC",
+      //               "CMTPI-7E7DE2E8",
+      //               "CMTPI-7F20D8BF",
+      //               "CMTPI-7F5741D1",
+      //               "CMTPI-8274BD0E",
+      //               "CMTPI-850E3A45",
+      //               "CMTPI-8515328A",
+      //               "CMTPI-85EA7391",
+      //               "CMTPI-8689EEBD",
+      //               "CMTPI-86E4060E",
+      //               "CMTPI-87CDB7F6",
+      //               "CMTPI-8942235C",
+      //               "CMTPI-8954B346",
+      //               "CMTPI-8984210C",
+      //               "CMTPI-8A3F12DF",
+      //               "CMTPI-8A4B6040",
+      //               "CMTPI-8AD8DAEE",
+      //               "CMTPI-8C45148C",
+      //               "CMTPI-8E018A89",
+      //               "CMTPI-8E8A5556",
+      //               "CMTPI-8F6E8CDB",
+      //               "CMTPI-90015D16",
+      //               "CMTPI-934B98B6",
+      //               "CMTPI-953B53CA",
+      //               "CMTPI-95E75EA0",
+      //               "CMTPI-984BCCFF",
+      //               "CMTPI-98841B87",
+      //               "CMTPI-9934B409",
+      //               "CMTPI-996C4193",
+      //               "CMTPI-9DB4FD07",
+      //               "CMTPI-9DC9C7F7",
+      //               "CMTPI-9F0DEDFA",
+      //               "CMTPI-A0EE7594",
+      //               "CMTPI-A2AC968C",
+      //               "CMTPI-A39D2810",
+      //               "CMTPI-A413DA25",
+      //               "CMTPI-A51B55FC",
+      //               "CMTPI-A543FAC7",
+      //               "CMTPI-A5E242D5",
+      //               "CMTPI-A63B1F25",
+      //               "CMTPI-A73E85F2",
+      //               "CMTPI-AB6B0B04",
+      //               "CMTPI-ACC93090",
+      //               "CMTPI-AD2B955A",
+      //               "CMTPI-AEB65419",
+      //               "CMTPI-AF5240F3",
+      //               "CMTPI-B0E4611D",
+      //               "CMTPI-B13FBA3C",
+      //               "CMTPI-B2BF819D",
+      //               "CMTPI-B41FEBF9",
+      //               "CMTPI-B4648159",
+      //               "CMTPI-B4E56305",
+      //               "CMTPI-B6E0D4BC",
+      //               "CMTPI-B78DCB42",
+      //               "CMTPI-B7D33688",
+      //               "CMTPI-B920F2B6",
+      //               "CMTPI-BDDD283A",
+      //               "CMTPI-BFDC91CF",
+      //               "CMTPI-BFE4C812",
+      //               "CMTPI-C1920E05",
+      //               "CMTPI-C27CDF74",
+      //               "CMTPI-C4784F98",
+      //               "CMTPI-C479838D",
+      //               "CMTPI-C7AAE075",
+      //               "CMTPI-C8A0D75E",
+      //               "CMTPI-CA8154CE",
+      //               "CMTPI-CB9C09B9",
+      //               "CMTPI-CD9D886C",
+      //               "CMTPI-CE58AFA9",
+      //               "CMTPI-CEDC9FF7",
+      //               "CMTPI-CFA1AA88",
+      //               "CMTPI-D070E4F4",
+      //               "CMTPI-D1F14AC5",
+      //               "CMTPI-D26119FF",
+      //               "CMTPI-D3D70833",
+      //               "CMTPI-D4693974",
+      //               "CMTPI-D7793568",
+      //               "CMTPI-D7C43271",
+      //               "CMTPI-D9590EB0",
+      //               "CMTPI-D974CFF4",
+      //               "CMTPI-DC6559FD",
+      //               "CMTPI-DDE7D632",
+      //               "CMTPI-DE81647C",
+      //               "CMTPI-DEC987A5",
+      //               "CMTPI-DEF6B208",
+      //               "CMTPI-DFE59E8D",
+      //               "CMTPI-E042CC1B",
+      //               "CMTPI-E1DEAC7D",
+      //               "CMTPI-E20BB9F2",
+      //               "CMTPI-E2F52345",
+      //               "CMTPI-E313B831",
+      //               "CMTPI-E4B5E538",
+      //               "CMTPI-E4C3137F",
+      //               "CMTPI-E6926241",
+      //               "CMTPI-E69D53C6",
+      //               "CMTPI-E6CC5A64",
+      //               "CMTPI-E8DF00E6",
+      //               "CMTPI-E9D70997",
+      //               "CMTPI-EB768A63",
+      //               "CMTPI-ED8C20E6",
+      //               "CMTPI-EE1639B5",
+      //               "CMTPI-F03021C3",
+      //               "CMTPI-F2E566C7",
+      //               "CMTPI-F3F02151",
+      //               "CMTPI-F43C2D2D",
+      //               "CMTPI-F5F2FB81",
+      //               "CMTPI-F62DEDE0",
+      //               "CMTPI-F6D422F4",
+      //               "CMTPI-FB87A995",
+      //               "CMTPI-FC3D4BE9",
+      //               "CMTPI-FC7E04CE",
+      //               "CMTPI-FD4F1CEF",
+      //               "CMTPI-FD8DEA72",
+      //               "CMTPI-FDF759B9",
+      //               "CMTPI-FF80AA3B",
+      //               "CMTPI-FFA711C8",
+      //               "CMTPI-FFF42BEE",
+      //               "JWBRSAFE"
+      //             ],
+      //             "content": {
+      //               "id": "jw_gQYQTxUJ"
+      //             }
+      //           }
+      //         }
+      //       }
+      //     },
+      //   ],
+      //   "refresh": true
+      // }
+    ];
 
-            // Replace this object to test a new Adapter!
-            bids: [{
-                bidder: 'appnexus',
-                params: {
-                    placementId: 13144370
-                }
-            }]
+    var pbjs = pbjs || {};
+    pbjs.que = pbjs.que || [];
 
-        }];
+  </script>
 
-        var pbjs = pbjs || {};
-        pbjs.que = pbjs.que || [];
+  <script>
+    var googletag = googletag || {};
+    googletag.cmd = googletag.cmd || [];
+    googletag.cmd.push(function () {
+      googletag.pubads().disableInitialLoad();
+    });
 
-    </script>
-
-    <script>
-        var googletag = googletag || {};
-        googletag.cmd = googletag.cmd || [];
-        googletag.cmd.push(function () {
-            googletag.pubads().disableInitialLoad();
-        });
-
-        pbjs.que.push(function () {
-            pbjs.addAdUnits(adUnits);
-
-            pbjs.requestBids({
-                bidsBackHandler: sendAdserverRequest,
-                timeout: PREBID_TIMEOUT
-            });
-        });
-
-        function sendAdserverRequest() {
-            if (pbjs.adserverRequestSent) return;
-            pbjs.adserverRequestSent = true;
-            googletag.cmd.push(function () {
-                pbjs.que.push(function () {
-                    pbjs.setTargetingForGPTAsync();
-                    googletag.pubads().refresh();
-                });
-            });
+    pbjs.que.push(function () {
+      pbjs.addAdUnits(adUnits);
+      pbjs.setConfig({
+        userSync: {
+          filterSettings: {
+            iframe: {
+              bidders: '*',      // '*' represents all bidders
+              filter: 'include'
+            }
+          }
         }
+      });
+      pbjs.onEvent('auctionEnd', (data) => {
+        console.log('rendering...');
+        data.bidsReceived[0].renderer.render();
+      });
+      pbjs.requestBids({
+        bidsBackHandler: sendAdserverRequest,
+        timeout: PREBID_TIMEOUT
+      });
+    });
 
-        setTimeout(function () {
-            sendAdserverRequest();
-        }, FAILSAFE_TIMEOUT);
-
-    </script>
-
-    <script>
-        googletag.cmd.push(function () {
-            googletag.defineSlot('/19968336/header-bid-tag-0', [[300, 250], [300, 600]], 'div-gpt-ad-1460505748561-0').addService(googletag.pubads());
-
-            googletag.pubads().enableSingleRequest();
-            googletag.enableServices();
+    function sendAdserverRequest() {
+      if (pbjs.adserverRequestSent) return;
+      pbjs.adserverRequestSent = true;
+      googletag.cmd.push(function () {
+        pbjs.que.push(function () {
+          pbjs.setTargetingForGPTAsync();
+          googletag.pubads().refresh();
         });
-    </script>
+      });
+    }
+
+    setTimeout(function () {
+      sendAdserverRequest();
+    }, FAILSAFE_TIMEOUT);
+
+  </script>
+
+  <script>
+    googletag.cmd.push(function () {
+      // googletag.defineSlot('/19968336/header-bid-tag-0', [[640, 480]], 'Video_Collapse_Autoplay_SoundOff').addService(googletag.pubads());
+      googletag.defineSlot('/19968336/header-bid-tag-0', [[300, 250]], 'div-1').addService(googletag.pubads());
+
+      googletag.pubads().enableSingleRequest();
+      googletag.enableServices();
+    });
+  </script>
 </head>
 
 <body>
-    <h2>Prebid.js Test</h2>
-    <h5>Div-1</h5>
-    <div id='div-gpt-ad-1460505748561-0'>
-        <script type='text/javascript'>
-            googletag.cmd.push(function () { googletag.display('div-gpt-ad-1460505748561-0'); });
-        </script>
-    </div>
+  <h2>Prebid.js Test</h2>
+  <h5>Div-1</h5>
+  <div id='div-1'>
+    <script type='text/javascript'>
+      googletag.cmd.push(function () { googletag.display('div-1'); });
+    </script>
+  </div>
 </body>
 
 </html>

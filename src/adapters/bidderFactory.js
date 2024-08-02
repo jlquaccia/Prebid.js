@@ -256,6 +256,8 @@ export function newBidder(spec) {
         if (metrics.measureTime('addBidResponse.validate', () => isValid(adUnitCode, bid))) {
           addBidResponse(adUnitCode, bid);
         } else {
+          // eslint-disable-next-line no-console
+          console.log('rejecting bid response');
           addBidResponse.reject(adUnitCode, bid, REJECTION_REASON.INVALID)
         }
       }
@@ -315,6 +317,8 @@ export function newBidder(spec) {
           if (bidRequest) {
             bid.adapterCode = bidRequest.bidder;
             if (isInvalidAlternateBidder(bid.bidderCode, bidRequest.bidder)) {
+              // eslint-disable-next-line no-console
+              console.log(`${bid.bidderCode} is not a registered partner or known bidder of ${bidRequest.bidder}, hence continuing without bid. If you wish to support this bidder, please mark allowAlternateBidderCodes as true in bidderSettings.`);
               logWarn(`${bid.bidderCode} is not a registered partner or known bidder of ${bidRequest.bidder}, hence continuing without bid. If you wish to support this bidder, please mark allowAlternateBidderCodes as true in bidderSettings.`);
               addBidResponse.reject(bidRequest.adUnitCode, bid, REJECTION_REASON.BIDDER_DISALLOWED)
               return;
@@ -326,6 +330,8 @@ export function newBidder(spec) {
             const prebidBid = Object.assign(createBid(STATUS.GOOD, bidRequest), bid, pick(bidRequest, TIDS));
             addBidWithCode(bidRequest.adUnitCode, prebidBid);
           } else {
+            // eslint-disable-next-line no-console
+            console.log(`Bidder ${spec.code} made bid for unknown request ID: ${bid.requestId}. Ignoring.`);
             logWarn(`Bidder ${spec.code} made bid for unknown request ID: ${bid.requestId}. Ignoring.`);
             addBidResponse.reject(null, bid, REJECTION_REASON.INVALID_REQUEST_ID);
           }
@@ -579,16 +585,22 @@ export function isValid(adUnitCode, bid, {index = auctionManager.index} = {}) {
   }
 
   if (!adUnitCode) {
+    // eslint-disable-next-line no-console
+    console.log('No adUnitCode was supplied to addBidResponse.');
     logWarn('No adUnitCode was supplied to addBidResponse.');
     return false;
   }
 
   if (!bid) {
+    // eslint-disable-next-line no-console
+    console.log(`Some adapter tried to add an undefined bid for ${adUnitCode}.`);
     logWarn(`Some adapter tried to add an undefined bid for ${adUnitCode}.`);
     return false;
   }
 
   if (!hasValidKeys()) {
+    // eslint-disable-next-line no-console
+    console.log(errorMessage(`Bidder ${bid.bidderCode} is missing required params. Check http://prebid.org/dev-docs/bidder-adapter-1.html for list of params.`));
     logError(errorMessage(`Bidder ${bid.bidderCode} is missing required params. Check http://prebid.org/dev-docs/bidder-adapter-1.html for list of params.`));
     return false;
   }
@@ -598,6 +610,8 @@ export function isValid(adUnitCode, bid, {index = auctionManager.index} = {}) {
     return false;
   }
   if (FEATURES.VIDEO && bid.mediaType === 'video' && !isValidVideoBid(bid, {index})) {
+    // eslint-disable-next-line no-console
+    console.log(errorMessage(`Video bid does not have required vastUrl or renderer property`));
     logError(errorMessage(`Video bid does not have required vastUrl or renderer property`));
     return false;
   }
