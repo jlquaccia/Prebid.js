@@ -5,6 +5,7 @@ import { config } from '../src/config.js';
 import { Renderer } from '../src/Renderer.js';
 import { bidderSettings } from '../src/bidderSettings.js';
 import { NATIVE_IMAGE_TYPES, NATIVE_KEYS_THAT_ARE_NOT_ASSETS, NATIVE_KEYS, NATIVE_ASSET_TYPES } from '../src/constants.js';
+import { enablePreviousAuctionInfo } from '../libraries/previousAuctionInfo/previousAuctionInfo.js';
 
 /**
  * @typedef {import('../src/adapters/bidderFactory.js').BidRequest} BidRequest
@@ -1482,5 +1483,7 @@ export const spec = {
     }
   }
 };
+
+enablePreviousAuctionInfo({ bidderCode: 'pubmatic', isBidRequestValid: spec.isBidRequestValid });
 
 registerBidder(spec);

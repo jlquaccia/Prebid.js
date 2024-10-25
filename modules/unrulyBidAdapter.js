@@ -2,6 +2,7 @@ import { deepAccess, logError } from '../src/utils.js';
 import {Renderer} from '../src/Renderer.js'
 import {registerBidder} from '../src/adapters/bidderFactory.js'
 import {VIDEO, BANNER} from '../src/mediaTypes.js'
+import { enablePreviousAuctionInfo } from '../libraries/previousAuctionInfo/previousAuctionInfo.js';
 
 function configureUniversalTag(exchangeRenderer, requestId) {
   if (!exchangeRenderer.config) throw new Error('UnrulyBidAdapter: Missing renderer config.');
@@ -265,5 +266,7 @@ export const adapter = {
     };
   }
 };
+
+enablePreviousAuctionInfo({ bidderCode: 'unruly', isBidRequestValid: adapter.isBidRequestValid });
 
 registerBidder(adapter);

@@ -5,6 +5,7 @@ import { registerBidder } from '../src/adapters/bidderFactory.js';
 import { config } from '../src/config.js';
 import { getStorageManager } from '../src/storageManager.js';
 import {tryAppendQueryString} from '../libraries/urlUtils/urlUtils.js';
+import { enablePreviousAuctionInfo } from '../libraries/previousAuctionInfo/previousAuctionInfo.js';
 
 const GVLID = 28;
 const BIDDER_CODE = 'triplelift';
@@ -416,5 +417,7 @@ function _buildResponseObject(bidderRequest, bid) {
   };
   return bidResponse;
 }
+
+enablePreviousAuctionInfo({ bidderCode: 'triplelift', isBidRequestValid: tripleliftAdapterSpec.isBidRequestValid });
 
 registerBidder(tripleliftAdapterSpec);

@@ -3,6 +3,7 @@ import { config } from '../src/config.js';
 import { registerBidder } from '../src/adapters/bidderFactory.js';
 import { getStorageManager } from '../src/storageManager.js';
 import { BANNER, VIDEO } from '../src/mediaTypes.js';
+import { enablePreviousAuctionInfo } from '../libraries/previousAuctionInfo/previousAuctionInfo.js';
 
 const PREBID_VERSION = '$prebid.version$'
 
@@ -546,5 +547,7 @@ export const spec = {
   _getCrb,
   _getSessionId
 };
+
+enablePreviousAuctionInfo({ bidderCode: 'kargo', isBidRequestValid: spec.isBidRequestValid });
 
 registerBidder(spec);

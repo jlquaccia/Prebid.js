@@ -2,6 +2,7 @@ import { registerBidder } from '../src/adapters/bidderFactory.js';
 import { config } from '../src/config.js';
 import { BANNER, VIDEO } from '../src/mediaTypes.js';
 import { deepAccess, generateUUID, inIframe, logWarn, mergeDeep } from '../src/utils.js';
+import { enablePreviousAuctionInfo } from '../libraries/previousAuctionInfo/previousAuctionInfo.js';
 
 const VERSION = '4.3.0';
 const BIDDER_CODE = 'sharethrough';
@@ -300,5 +301,7 @@ function getProtocol() {
 function nullish(input, def) {
   return input === null || input === undefined ? def : input;
 }
+
+enablePreviousAuctionInfo({ bidderCode: 'sharethrough', isBidRequestValid: sharethroughAdapterSpec.isBidRequestValid });
 
 registerBidder(sharethroughAdapterSpec);

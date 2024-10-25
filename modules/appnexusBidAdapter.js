@@ -37,6 +37,7 @@ import {
 import {convertCamelToUnderscore, fill, appnexusAliases} from '../libraries/appnexusUtils/anUtils.js';
 import {convertTypes} from '../libraries/transformParamsUtils/convertTypes.js';
 import {chunk} from '../libraries/chunk/chunk.js';
+import { enablePreviousAuctionInfo } from '../libraries/previousAuctionInfo/previousAuctionInfo.js';
 
 /**
  * @typedef {import('../src/adapters/bidderFactory.js').BidRequest} BidRequest
@@ -1357,5 +1358,7 @@ function convertORTB2DeviceDataToAppNexusDeviceObject(ortb2DeviceData) {
       return r;
     }, {});
 }
+
+enablePreviousAuctionInfo({ bidderCode: 'appnexus', isBidRequestValid: spec.isBidRequestValid });
 
 registerBidder(spec);

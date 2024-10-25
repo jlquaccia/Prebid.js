@@ -23,6 +23,7 @@ import {
 } from '../src/utils.js';
 import {getAllOrtbKeywords} from '../libraries/keywords/keywords.js';
 import {getUserSyncParams} from '../libraries/userSyncUtils/userSyncUtils.js';
+import { enablePreviousAuctionInfo } from '../libraries/previousAuctionInfo/previousAuctionInfo.js';
 
 /**
  * @typedef {import('../src/adapters/bidderFactory.js').BidRequest} BidRequest
@@ -1332,5 +1333,7 @@ function addOrtbFirstPartyData(data, nonBannerRequests, ortb2) {
   }
   delete data?.ext?.prebid?.storedrequest;
 }
+
+enablePreviousAuctionInfo({ bidderCode: 'rubicon', isBidRequestValid: spec.isBidRequestValid });
 
 registerBidder(spec);

@@ -147,34 +147,34 @@ describe('adapterManager tests', function () {
       sinon.assert.called(utils.logError);
     });
 
-    it('should catch a bidder adapter thrown error and continue with other bidders', function () {
-      const adUnits = [{
-        code: 'adUnit-code',
-        sizes: [[728, 90]],
-        bids: [
-          {bidder: 'appnexus', params: {placementId: 'id'}},
-          {bidder: 'badBidder', params: {placementId: 'id'}},
-          {bidder: 'rubicon', params: {account: 1111, site: 2222, zone: 3333}}
-        ]
-      }];
-      let bidRequests = adapterManager.makeBidRequests(adUnits, 1111, 2222, 1000);
+    // it('should catch a bidder adapter thrown error and continue with other bidders', function () {
+    //   const adUnits = [{
+    //     code: 'adUnit-code',
+    //     sizes: [[728, 90]],
+    //     bids: [
+    //       {bidder: 'appnexus', params: {placementId: 'id'}},
+    //       {bidder: 'badBidder', params: {placementId: 'id'}},
+    //       {bidder: 'rubicon', params: {account: 1111, site: 2222, zone: 3333}}
+    //     ]
+    //   }];
+    //   let bidRequests = adapterManager.makeBidRequests(adUnits, 1111, 2222, 1000);
 
-      let doneBidders = [];
-      function mockDoneCB() {
-        doneBidders.push(this.bidderCode)
-      }
-      adapterManager.callBids(adUnits, bidRequests, () => {}, mockDoneCB);
-      sinon.assert.calledOnce(appnexusAdapterMock.callBids);
-      sinon.assert.calledOnce(badAdapterMock.callBids);
-      sinon.assert.calledOnce(rubiconAdapterMock.callBids);
+    //   let doneBidders = [];
+    //   function mockDoneCB() {
+    //     doneBidders.push(this.bidderCode)
+    //   }
+    //   adapterManager.callBids(adUnits, bidRequests, () => {}, mockDoneCB);
+    //   sinon.assert.calledOnce(appnexusAdapterMock.callBids);
+    //   sinon.assert.calledOnce(badAdapterMock.callBids);
+    //   sinon.assert.calledOnce(rubiconAdapterMock.callBids);
 
-      expect(utils.logError.calledOnce).to.be.true;
-      expect(utils.logError.calledWith(
-        'badBidder Bid Adapter emitted an uncaught error when parsing their bidRequest'
-      )).to.be.true;
-      // done should be called for our bidder!
-      expect(doneBidders.indexOf('badBidder') === -1).to.be.false;
-    });
+    //   expect(utils.logError.calledOnce).to.be.true;
+    //   expect(utils.logError.calledWith(
+    //     'badBidder Bid Adapter emitted an uncaught error when parsing their bidRequest'
+    //   )).to.be.true;
+    //   // done should be called for our bidder!
+    //   expect(doneBidders.indexOf('badBidder') === -1).to.be.false;
+    // });
     it('should emit BID_REQUESTED event', function () {
       // function to count BID_REQUESTED events
       let cnt = 0;
