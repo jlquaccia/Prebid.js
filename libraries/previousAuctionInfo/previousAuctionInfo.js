@@ -3,77 +3,95 @@ import { EVENTS } from '../../src/constants.js';
 
 export let previousAuctionInfoEnabled = false;
 let enabledBidders = [];
-const winningBidsMap = {};
+export let winningBidsMap = {};
 
-export const enablePreviousAuctionInfo = (config) => {
+export const resetPreviousAuctionInfo = () => {
+  previousAuctionInfoEnabled = false;
+  enabledBidders = [];
+  winningBidsMap = {};
+};
+
+export const enablePreviousAuctionInfo = (config, cb = initHandlers) => {
   const { bidderCode, isBidRequestValid } = config;
   const enabledBidder = enabledBidders.find(bidder => bidder.bidderCode === bidderCode);
   if (!enabledBidder) enabledBidders.push({ bidderCode, isBidRequestValid, maxQueueLength: config.maxQueueLength || 10 });
   if (previousAuctionInfoEnabled) return;
   previousAuctionInfoEnabled = true;
+  cb();
+}
+
+export const initHandlers = () => {
   onEvent(EVENTS.AUCTION_END, onAuctionEndHandler);
   onEvent(EVENTS.BID_WON, onBidWonHandler);
   onEvent(EVENTS.BID_REQUESTED, onBidRequestedHandler);
-}
+};
 
-const onAuctionEndHandler = (auctionDetails) => {
+export const onAuctionEndHandler = (auctionDetails) => {
   // eslint-disable-next-line no-console
   console.log('onAuctionEndHandler', auctionDetails);
 
   try {
-    const highestCpmBid = auctionDetails.bidsReceived.reduce((highestBid, currentBid) => {
-      return currentBid.cpm > highestBid.cpm ? currentBid : highestBid;
-    }, auctionDetails.bidsReceived[0]);
+    let highestCpmBid = 0;
     const receivedBidsMap = {};
     const rejectedBidsMap = {};
 
-    auctionDetails.bidsReceived.forEach(bidReceived => {
-      receivedBidsMap[bidReceived.requestId] = bidReceived;
-    });
+    if (auctionDetails.bidsReceived && auctionDetails.bidsReceived.length) {
+      highestCpmBid = auctionDetails.bidsReceived.reduce((highestBid, currentBid) => {
+        return currentBid.cpm > highestBid.cpm ? currentBid : highestBid;
+      }, auctionDetails.bidsReceived[0]);
 
-    auctionDetails.bidsRejected.forEach(bidRejected => {
-      rejectedBidsMap[bidRejected.requestId] = bidRejected;
-    });
+      auctionDetails.bidsReceived.forEach(bidReceived => {
+        receivedBidsMap[bidReceived.requestId] = bidReceived;
+      });
+    }
 
-    auctionDetails.bidderRequests.forEach(bidderRequest => {
-      const enabledBidder = enabledBidders.find(bidder => bidder.bidderCode === bidderRequest.bidderCode);
+    if (auctionDetails.bidsRejected && auctionDetails.bidsRejected.length) {
+      auctionDetails.bidsRejected.forEach(bidRejected => {
+        rejectedBidsMap[bidRejected.requestId] = bidRejected;
+      });
+    }
 
-      if (enabledBidder) {
-        bidderRequest.bids.forEach(bid => {
-          const isValidBid = enabledBidder.isBidRequestValid(bid);
+    if (auctionDetails.bidderRequests && auctionDetails.bidderRequests.length) {
+      auctionDetails.bidderRequests.forEach(bidderRequest => {
+        const enabledBidder = enabledBidders.find(bidder => bidder.bidderCode === bidderRequest.bidderCode);
 
-          if (!isValidBid) return;
+        if (enabledBidder) {
+          bidderRequest.bids.forEach(bid => {
+            const isValidBid = enabledBidder.isBidRequestValid(bid);
 
-          const previousAuctionInfoPayload = {
-            bidderRequestId: bidderRequest.bidderRequestId,
-            minBidToWin: highestCpmBid?.cpm || 0,
-            rendered: 0,
-            transactionId: bid.ortb2Imp.ext.tid || bid.transactionId,
-            source: 'pbjs',
-            auctionId: auctionDetails.auctionId,
-            impId: bid.adUnitCode,
-            // bidResponseId: FLOAT, // don't think this is available client side?
-            // targetedbidcpm: FLOAT, // don't think this is available client side?
-            highestcpm: highestCpmBid?.cpm || 0,
-            cur: bid.ortb2.cur,
-            bidderCpm: receivedBidsMap[bid.bidId] ? receivedBidsMap[bid.bidId].cpm : 'nobid',
-            biddererrorcode: rejectedBidsMap[bid.bidId] ? rejectedBidsMap[bid.bidId].rejectionReason : -1,
-            timestamp: auctionDetails.timestamp,
-          }
+            if (!isValidBid) return;
 
-          window.pbpai = window.pbpai || {};
-          if (!window.pbpai[bidderRequest.bidderCode]) {
-            window.pbpai[bidderRequest.bidderCode] = [];
-          }
+            const previousAuctionInfoPayload = {
+              bidderRequestId: bidderRequest.bidderRequestId,
+              minBidToWin: highestCpmBid?.cpm || 0,
+              rendered: 0,
+              transactionId: bid.ortb2Imp.ext.tid || bid.transactionId,
+              source: 'pbjs',
+              auctionId: auctionDetails.auctionId,
+              impId: bid.adUnitCode,
+              // bidResponseId: FLOAT, // don't think this is available client side?
+              // targetedbidcpm: FLOAT, // don't think this is available client side?
+              highestcpm: highestCpmBid?.cpm || 0,
+              cur: bid.ortb2.cur,
+              bidderCpm: receivedBidsMap[bid.bidId] ? receivedBidsMap[bid.bidId].cpm : 'nobid',
+              biddererrorcode: rejectedBidsMap[bid.bidId] ? rejectedBidsMap[bid.bidId].rejectionReason : -1,
+              timestamp: auctionDetails.timestamp,
+            }
 
-          if (window.pbpai[bidderRequest.bidderCode].length > enabledBidder.maxQueueLength) {
-            window.pbpai[bidderRequest.bidderCode].shift();
-          }
+            window.pbpai = window.pbpai || {};
+            if (!window.pbpai[bidderRequest.bidderCode]) {
+              window.pbpai[bidderRequest.bidderCode] = [];
+            }
 
-          window.pbpai[bidderRequest.bidderCode].push(previousAuctionInfoPayload);
-        });
-      }
-    });
+            if (window.pbpai[bidderRequest.bidderCode].length > enabledBidder.maxQueueLength) {
+              window.pbpai[bidderRequest.bidderCode].shift();
+            }
+
+            window.pbpai[bidderRequest.bidderCode].push(previousAuctionInfoPayload);
+          });
+        }
+      });
+    }
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error);
@@ -81,12 +99,12 @@ const onAuctionEndHandler = (auctionDetails) => {
 }
 
 const onBidWonHandler = (winningBid) => {
-  // eslint-disable-next-line no-console
-  console.log('onBidWonHandler', winningBid);
+  // // eslint-disable-next-line no-console
+  // console.log('onBidWonHandler', winningBid);
   winningBidsMap[winningBid.transactionId] = winningBid;
 }
 
-const onBidRequestedHandler = (bidRequest) => {
+export const onBidRequestedHandler = (bidRequest) => {
   try {
     const enabledBidder = enabledBidders.find(bidder => bidder.bidderCode === bidRequest.bidderCode);
     window.pbpai = window.pbpai || {};
