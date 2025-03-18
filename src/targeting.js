@@ -289,7 +289,13 @@ export function newTargeting(auctionManager) {
     const bidLimitConfigValue = config.getConfig('sendBidsControl.bidLimit');
     const adUnitBidLimit = (sendAllBids && (bidLimit || bidLimitConfigValue)) || 0;
     const { customKeysByUnit, filteredBids } = getfilteredBidsAndCustomKeys(adUnitCodes, bidsReceived);
-    const bidsSorted = getHighestCpmBidsFromBidPool(filteredBids, winReducer, adUnitBidLimit, undefined, winSorter);
+    let bidsSorted = getHighestCpmBidsFromBidPool(filteredBids, winReducer, adUnitBidLimit, undefined, winSorter);
+
+    const bidTargetingExclusion = config.getConfig('bidTargetingExclusion');
+    if (typeof bidTargetingExclusion === 'function') {
+      bidsSorted = bidsSorted.filter(bid => !bidTargetingExclusion(bid));
+    }
+
     let targeting = getTargetingLevels(bidsSorted, customKeysByUnit, adUnitCodes);
 
     const defaultKeys = Object.keys(Object.assign({}, DEFAULT_TARGETING_KEYS, NATIVE_KEYS));
@@ -322,7 +328,8 @@ export function newTargeting(auctionManager) {
         targeting[code] = {};
       }
     });
-
+    // eslint-disable-next-line no-console
+    console.log('targeting', targeting);
     return targeting;
   };
 
@@ -486,7 +493,7 @@ export function newTargeting(auctionManager) {
   }
 
   targeting.setTargetingForGPT = hook('sync', function (adUnit, customSlotMatching) {
-  // get our ad unit codes
+    // get our ad unit codes
     let targetingSet = targeting.getAllTargeting(adUnit);
 
     let resetMap = Object.fromEntries(pbTargetingKeys.map(key => [key, null]));
