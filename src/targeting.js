@@ -328,8 +328,7 @@ export function newTargeting(auctionManager) {
         targeting[code] = {};
       }
     });
-    // eslint-disable-next-line no-console
-    console.log('targeting', targeting);
+
     return targeting;
   };
 
@@ -493,7 +492,7 @@ export function newTargeting(auctionManager) {
   }
 
   targeting.setTargetingForGPT = hook('sync', function (adUnit, customSlotMatching) {
-    // get our ad unit codes
+  // get our ad unit codes
     let targetingSet = targeting.getAllTargeting(adUnit);
 
     let resetMap = Object.fromEntries(pbTargetingKeys.map(key => [key, null]));
