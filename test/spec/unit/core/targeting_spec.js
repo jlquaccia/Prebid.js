@@ -333,6 +333,7 @@ describe('targeting tests', function () {
     });
 
     afterEach(function() {
+      sandbox.restore();
       config.resetConfig();
       logWarnStub.restore();
       logErrorStub.restore();
@@ -968,6 +969,77 @@ describe('targeting tests', function () {
       expect(targeting['/123456/header-bid-tag-0']).to.contain.keys('hb_deal', 'hb_adid', 'hb_bidder');
       expect(targeting['/123456/header-bid-tag-0']['hb_adid']).to.equal(bid1.adId);
     });
+
+    describe('bidTargetingExclusion Functionality', function () {
+      let excludedBid, validBid, getBidsReceivedStub;
+    
+      beforeEach(function () {
+        sandbox = sinon.createSandbox();
+
+        excludedBid = deepClone(bid1);
+        excludedBid.bidder = 'excludedBidder';
+        excludedBid.adserverTargeting[TARGETING_KEYS.BIDDER] = 'excludedBidder';
+        excludedBid.adId = 'excluded-bid-adid';
+
+        validBid = deepClone(bid2);
+        validBid.bidder = 'validBidder';
+        validBid.adserverTargeting[TARGETING_KEYS.BIDDER] = 'validBidder';
+        validBid.adId = 'valid-bid-adid';
+
+        if (auctionManager.getBidsReceived.restore) {
+          auctionManager.getBidsReceived.restore();
+        }
+
+        sandbox.stub(auctionManager, 'getBidsReceived').returns([excludedBid, validBid]);
+
+        config.setConfig({
+          bidTargetingExclusion: function (bid) {
+            return bid.bidder === 'excludedBidder';
+          }
+        });
+      });
+    
+      afterEach(function () {
+        sandbox.restore();
+        bidCacheFilterFunction = undef;
+        config.resetConfig();
+      });
+    
+      it('should exclude bids from targeting when bidTargetingExclusion function is applied', function () {
+        const targeting = targetingInstance.getAllTargeting(['/123456/header-bid-tag-0']);
+        // eslint-disable-next-line no-console
+        console.log('hallo123', targeting);
+        expect(targeting['/123456/header-bid-tag-0']).to.not.have.property('hb_adid_excludedBidder');
+        expect(targeting['/123456/header-bid-tag-0']).to.have.property('hb_adid_validBidder');
+      });
+
+      it('should allow eligible excluded bids for subsequent auctions', function () {
+        const bidsReceived = auctionManager.getBidsReceived();
+        const now = Date.now();
+      
+        // Get excluded bid
+        const excludedBid = bidsReceived.find(bid => bid.adId === 'excluded-bid-adid');
+        expect(excludedBid).to.exist; // Ensures the bid is still stored
+      
+        // Get valid bid
+        const validBid = bidsReceived.find(bid => bid.adId === 'valid-bid-adid');
+        expect(validBid).to.exist;
+      
+        // Check if excluded bid is eligible for future auctions
+        const isExcludedBidEligible = excludedBid &&
+          (!excludedBid.status || !['rendered', 'targetingSet'].includes(excludedBid.status)) && // Excluded bids should not be 'rendered' or 'targetingSet'
+          (excludedBid.responseTimestamp + (excludedBid.ttl * 1000)) > now; // Bid has not expired
+      
+        expect(isExcludedBidEligible).to.be.false; // Excluded bids should NOT be eligible
+      
+        // Check if valid bid is eligible for future auctions
+        const isValidBidEligible = validBid &&
+          (!validBid.status || !['rendered', 'targetingSet'].includes(validBid.status)) &&
+          (validBid.responseTimestamp + (validBid.ttl * 1000)) > now;
+      
+        expect(isValidBidEligible).to.be.true; // Valid bids should be eligible
+      });
+    });
   }); // end getAllTargeting tests
 
   describe('getAllTargeting will work correctly when a hook raises has modified flag in getHighestCpmBidsFromBidPool', function () {
@@ -1528,5 +1600,5 @@ describe('targeting tests', function () {
         'div-1': [slots[0]]
       })
     })
-  })
+  });
 });
